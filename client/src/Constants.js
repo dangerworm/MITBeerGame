@@ -6,6 +6,8 @@ export const CreateNewPlayer = 'CreateNewPlayer';
 export const ReceiveMessage = 'ReceiveMessage';
 export const SendMessage = 'SendMessage';
 
+export const UpdateGames = 'UpdateGames';
+
 export const SignalREndpoint = 'http://localhost:5000';
 
 export const Hubs = {

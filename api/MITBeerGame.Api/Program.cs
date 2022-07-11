@@ -18,16 +18,27 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 builder.Services.AddSingleton<IGameStore, GameStore>();
 builder.Services.AddSingleton<ITeamStore, TeamStore>();
 
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.UseCors(Constants.CorsPolicy);
+app.MapControllers();
 app.UseRouting();
 
-app.MapHub<GameHub>("/playerHub");
+app.MapHub<GameHub>("/gameHub");
 
 app.Run();

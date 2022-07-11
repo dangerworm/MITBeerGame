@@ -12,9 +12,9 @@ namespace MITBeerGame.Api.Stores
             _games = new Dictionary<string, Game>();
         }
 
-        public Game Create()
+        public Game Create(string gameName)
         {
-            var game = new Game();
+            var game = new Game(gameName);
 
             _games.Add(game.Id, game);
 

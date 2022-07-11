@@ -24,10 +24,21 @@ namespace MITBeerGame.Api.Controllers
             _teamStore = teamStore;
         }
 
-        [HttpPost("CreateGame")]
-        public async Task<IActionResult> CreateGame()
+        [HttpGet("GetGames")]
+        public async Task<IActionResult> GetGames()
         {
-            var game = _gameStore.Create();
+            var games = _gameStore.ReadAll();
+
+            return new JsonResult(games);
+        }
+
+        [HttpPost("CreateGame")]
+        public async Task<IActionResult> CreateGame(GameInput gameInput)
+        {
+            var game = _gameStore.Create(gameInput.GameName);
+
+            var games = _gameStore.ReadAll();
+            await _gameHub.Clients.All.UpdateGames(games);
 
             return new JsonResult(game);
         }
