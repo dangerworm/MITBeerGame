@@ -4,6 +4,7 @@ using MITBeerGame.Api.Hubs;
 using MITBeerGame.Api.Interfaces;
 using MITBeerGame.Api.Models;
 using MITBeerGame.Api.Stores;
+using System.Linq;
 
 namespace MITBeerGame.Api.Controllers
 {
@@ -52,8 +53,8 @@ namespace MITBeerGame.Api.Controllers
             return new JsonResult(teams);
         }
 
-        [HttpPost("AddTeam")]
-        public async Task<IActionResult> AddTeam(string gameId, string teamName)
+        [HttpPost("CreateTeam")]
+        public async Task<IActionResult> CreateTeam(string gameId, string teamName)
         {
             var game = _gameStore.Read(gameId);
             if (_teamStore.TeamExists(teamName, game.TeamIds))

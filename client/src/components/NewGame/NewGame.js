@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-import { Connected, CreateNewGame, UpdateGames } from '../../Constants'
+import { Connected, HostName, GetHeaders, PostHeaders, UpdateGames } from '../../Constants'
 
 const NewGame = (props) => {
   const [connection, setConnection] = useState(null);
   const [games, setGames] = useState([]);
-  const [name, setName] = useState('');
+  const [gameName, setGameName] = useState('');
 
-  const hostname = 'https://localhost:7046/';
-  const endpoint = 'gameHub';
+  const gameHub = 'gameHub';
 
-  const getGamesEndpoint = 'https://localhost:7046/Game/GetGames'
-  const createGameEndpoint = 'https://localhost:7046/Game/CreateGame';
+  const getGamesEndpoint = 'Game/GetGames'
+  const createGameEndpoint = 'Game/CreateGame';
 
-  const createConnection = (hostname) => {
+  const createConnection = () => {
     const hubConnection = new HubConnectionBuilder()
-      .withUrl(hostname + endpoint)
+      .withUrl(HostName + gameHub)
       .withAutomaticReconnect()
       .build();
 
@@ -24,93 +23,75 @@ const NewGame = (props) => {
   }
 
   const getGames = () => {
-    fetch(getGamesEndpoint, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(response => {
-        response
-          .json()
-          .then(data => {
-            setGames(data);
-          });
-      });
+    const endpoint = HostName + getGamesEndpoint;
+    fetch(endpoint, GetHeaders)
+      .then(response => response
+        .json()
+        .then(data => setGames(data)));
+  };
+
+  const onGameNameUpdate = (event) => {
+    setGameName(event.target.value);
   }
 
-  const postNewGameName = () => {
-    fetch(createGameEndpoint, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ gameName: name })
+  const postNewGameName = async () => {
+    const response = await fetch(HostName + createGameEndpoint, {
+      ...PostHeaders,
+      body: JSON.stringify({ gameName })
     });
+
+    if (response.ok) {
+      const gameId = response.body.json()['gameId'];
+      window.location.href = `/newPlayer/${gameId}`;
+    }
+  }
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    if (gameName && gameName !== '') {
+      postNewGameName();
+    }
+    else {
+      alert('Please type the name of a new game.');
+    }
   }
 
   useEffect(() => {
     if (!!connection && connection.state !== Connected) {
       connection.start()
-      .then(_ => {
-        console.log("Connected!");
+        .then(_ => {
+          console.log("Connected!");
 
-        connection.on(UpdateGames, data => {
-          setGames(data);
+          connection.on(UpdateGames, data => {
+            setGames(data);
+          });
+        })
+        .catch(e => {
+          console.log(e);
         });
-      })
-      .catch(e => {
-        console.log(e);
-      });
     }
   }, [connection, setGames])
-  
-  const sendMessage = async(name) => {
-    const newGameMessage = { name };
-
-    if (!!connection && connection.state === Connected) {
-      try {
-        await connection.send(CreateNewGame, newGameMessage);
-      }
-      catch (e) {
-        console.log(e);
-      }
-    }
-    else {
-      alert ('No connection to server yet');
-    }
-  }
 
   useEffect(() => {
-    createConnection(hostname);
+    createConnection(HostName);
     getGames();
   }, []);
-
-   const onNameUpdate = (event) => {
-    setName(event.target.value);
-  }
-
-  const onSubmit = (event) => {
-    event.preventDefault();
-
-    const isNameProvided = name && name !== '';
-
-    if (isNameProvided) {
-      postNewGameName();
-    }
-    else {
-      alert('Please type a name and team, and pick a role');
-    }
-  }
 
   return (
     <div>
       <h1>MIT Beer Game</h1>
+      <h2 style={{ marginBottom: "4pt" }}>New Game</h2>
+      <form onSubmit={onSubmit}>
+        <label htmlFor={gameName}>Name your game:</label>
+        <br />
+        <input id="gameName" name="gameName" value={gameName} onChange={onGameNameUpdate} />
+        <br />
+        <br />
+        <button>Submit</button>
+      </form>
       {games.length > 0 &&
         <div>
-          <h2>Existing Games</h2>
+          <h2 style={{ marginBottom: "4pt" }}>Existing Games</h2>
           <ul>
             {games.map(g =>
               <li key={g.id}>{g.name}</li>
@@ -118,14 +99,6 @@ const NewGame = (props) => {
           </ul>
         </div>
       }
-      <form onSubmit={onSubmit}>
-        <label htmlFor={name}>New game name:</label>
-        <br />
-        <input id="gameName" name="gameName" value={name} onChange={onNameUpdate} />
-        <br />
-        <br />
-        <button>Submit</button>
-      </form>
     </div>
   )
 }
