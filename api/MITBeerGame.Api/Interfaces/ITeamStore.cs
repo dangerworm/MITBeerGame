@@ -4,7 +4,7 @@ namespace MITBeerGame.Api.Interfaces
 {
     public interface ITeamStore
     {
-        void AddPlayer(string teamId, Role player);
+        void AddPlayer(string teamId, Player player);
         Team Create(string teamName);
         IEnumerable<Team> Read(IEnumerable<string> ids);
         Team Read(string id);

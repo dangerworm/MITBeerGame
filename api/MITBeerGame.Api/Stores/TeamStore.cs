@@ -32,9 +32,9 @@ namespace MITBeerGame.Api.Stores
             return _teams.Values.Where(x => ids.Contains(x.Id));
         }
 
-        public void AddPlayer(string teamId, Role role)
+        public void AddPlayer(string teamId, Player role)
         {
-            _teams[teamId].Roles.Add(role);
+            _teams[teamId].Players.Add(role);
         }
 
         public bool TeamExists(string teamName, IEnumerable<string>? teamIds = null)
@@ -48,7 +48,7 @@ namespace MITBeerGame.Api.Stores
         {
             var roleType = Helpers.GetRoleType(role);
 
-            return _teams[teamId].Roles.Any(p => p.RoleType == roleType);
+            return _teams[teamId].Players.Any(p => p.RoleType == roleType);
         }
     }
 }

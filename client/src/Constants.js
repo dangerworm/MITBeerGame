@@ -10,6 +10,7 @@ export const SendMessage = 'SendMessage';
 
 export const UpdateGames = 'UpdateGames';
 export const UpdateTeams = 'UpdateTeams';
+export const UpdatePlayers = 'UpdatePlayers';
 
 export const Hubs = {
   'NewGame': 'newgame',

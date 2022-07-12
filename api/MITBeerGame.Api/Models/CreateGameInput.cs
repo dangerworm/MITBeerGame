@@ -1,6 +1,6 @@
 ﻿namespace MITBeerGame.Api.Models
 {
-    public class GameInput
+    public class CreateGameInput
     {
         public string GameName { get; set; }
     }

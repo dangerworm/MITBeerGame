@@ -2,11 +2,11 @@
 
 namespace MITBeerGame.Api.Models
 {
-    public class Role
+    public class Player
     {
-        public Role(string name, RoleType role)
+        public Player(string name, RoleType role)
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid().ToString()[..6];
 
             PlayerName = name;
             RoleType = role;
@@ -17,5 +17,7 @@ namespace MITBeerGame.Api.Models
         public string PlayerName { get; }
         
         public RoleType RoleType { get; }
+
+        public string Role => RoleType.GetRole();
     }
 }

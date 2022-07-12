@@ -5,7 +5,7 @@ namespace MITBeerGame.Api
 {
     public static class Helpers
     {
-        public static RoleType GetRoleType(string role)
+        public static RoleType GetRoleType(this string role)
         {
             return role.ToLower() switch
             {
@@ -17,7 +17,7 @@ namespace MITBeerGame.Api
             };
         }
 
-        public static string GetRole(RoleType roleType)
+        public static string GetRole(this RoleType roleType)
         {
             return roleType switch
             {

@@ -4,19 +4,19 @@
     {
         public Team(string name)
         {
-            Id = Guid.NewGuid().ToString();
+            Id = Guid.NewGuid().ToString()[..6];
 
             Name = name;
 
-            Roles = new List<Role>();
+            Players = new List<Player>();
         }
 
         public string Id { get; }
 
         public string Name { get; }
 
-        public List<Role> Roles { get; }
+        public List<Player> Players { get; }
         
-        public IEnumerable<string> PlayerNames => Roles.Select(x => x.PlayerName);
+        public IEnumerable<string> PlayerNames => Players.Select(x => x.PlayerName);
     }
 }

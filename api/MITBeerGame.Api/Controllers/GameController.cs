@@ -34,9 +34,9 @@ namespace MITBeerGame.Api.Controllers
         }
 
         [HttpPost("CreateGame")]
-        public async Task<IActionResult> CreateGame(GameInput gameInput)
+        public async Task<IActionResult> CreateGame([FromBody] CreateGameInput input)
         {
-            var game = _gameStore.Create(gameInput.GameName);
+            var game = _gameStore.Create(input.GameName);
 
             var games = _gameStore.ReadAll();
             await _gameHub.Clients.All.UpdateGames(games);
@@ -44,8 +44,8 @@ namespace MITBeerGame.Api.Controllers
             return new JsonResult(game);
         }
 
-        [HttpGet("GetTeams")]
-        public async Task<IActionResult> GetTeams(string gameId)
+        [HttpGet("GetTeams/{gameId}")]
+        public async Task<IActionResult> GetTeams([FromRoute] string gameId)
         {
             var game = _gameStore.Read(gameId);
             var teams = _teamStore.Read(game.TeamIds);
@@ -54,16 +54,16 @@ namespace MITBeerGame.Api.Controllers
         }
 
         [HttpPost("CreateTeam")]
-        public async Task<IActionResult> CreateTeam(string gameId, string teamName)
+        public async Task<IActionResult> CreateTeam([FromBody] CreateTeamInput input)
         {
-            var game = _gameStore.Read(gameId);
-            if (_teamStore.TeamExists(teamName, game.TeamIds))
+            var game = _gameStore.Read(input.GameId);
+            if (_teamStore.TeamExists(input.TeamName, game.TeamIds))
             {
                 return new JsonResult(new { Error = $"That team already exists in game {game.Id}." });
             }
 
-            var team = _teamStore.Create(teamName);
-            _gameStore.AddTeam(gameId, team.Id);
+            var team = _teamStore.Create(input.TeamName);
+            _gameStore.AddTeam(input.GameId, team.Id);
 
             var teams = _teamStore.Read(game.TeamIds.Union(new[] { team.Id }));
 
@@ -72,30 +72,30 @@ namespace MITBeerGame.Api.Controllers
             return new JsonResult(team);
         }
 
-        [HttpGet("GetRoles")]
-        public async Task<IActionResult> GetRoles(string teamId)
+        [HttpGet("GetPlayers/{teamId}")]
+        public async Task<IActionResult> GetPlayers([FromRoute] string teamId)
         {
             var team = _teamStore.Read(teamId);
-            var roles = team.Roles;
+            var roles = team.Players;
 
             return new JsonResult(roles);
         }
 
-        [HttpPost("AddPlayer")]
-        public async Task<IActionResult> AddPlayer(string teamId, string playerName, string playerRole)
+        [HttpPost("CreatePlayer")]
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerInput input)
         {
-            var team = _teamStore.Read(teamId);
-            if (_teamStore.RoleFilled(playerRole, teamId))
+            var team = _teamStore.Read(input.TeamId);
+            if (_teamStore.RoleFilled(input.PlayerRole, input.TeamId))
             {
-                return new JsonResult(new { Error = $"There is already a player in that role for team {team.Name}." });
+                return new JsonResult(new { Error = $"There is already a player in that role for {team.Name}." });
             }
 
-            var player = new Role(playerName, Helpers.GetRoleType(playerRole));
-            _teamStore.AddPlayer(teamId, player);
+            var player = new Player(input.PlayerName, Helpers.GetRoleType(input.PlayerRole));
+            _teamStore.AddPlayer(input.TeamId, player);
             
-            team = _teamStore.Read(teamId);
+            team = _teamStore.Read(input.TeamId);
 
-            await _gameHub.Clients.All.UpdateTeam(team);
+            await _gameHub.Clients.All.UpdatePlayers(team);
 
             return new JsonResult(team);
         }
