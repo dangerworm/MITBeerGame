@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using MITBeerGame.Api.Hubs;
 using MITBeerGame.Api.Interfaces;
 using MITBeerGame.Api.Models;
-using MITBeerGame.Api.Stores;
-using System.Linq;
 
 namespace MITBeerGame.Api.Controllers
 {
@@ -44,11 +42,10 @@ namespace MITBeerGame.Api.Controllers
             return new JsonResult(game);
         }
 
-        [HttpGet("GetTeams/{gameId}")]
-        public async Task<IActionResult> GetTeams([FromRoute] string gameId)
+        [HttpGet("GetTeams")]
+        public async Task<IActionResult> GetTeams()
         {
-            var game = _gameStore.Read(gameId);
-            var teams = _teamStore.Read(game.TeamIds);
+            var teams = _teamStore.ReadAll();
 
             return new JsonResult(teams);
         }
@@ -62,23 +59,13 @@ namespace MITBeerGame.Api.Controllers
                 return new JsonResult(new { Error = $"That team already exists in game {game.Id}." });
             }
 
-            var team = _teamStore.Create(input.TeamName);
+            var team = _teamStore.Create(input.GameId, input.TeamName);
             _gameStore.AddTeam(input.GameId, team.Id);
 
-            var teams = _teamStore.Read(game.TeamIds.Union(new[] { team.Id }));
-
+            var teams = _teamStore.ReadAll();
             await _gameHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(team);
-        }
-
-        [HttpGet("GetPlayers/{teamId}")]
-        public async Task<IActionResult> GetPlayers([FromRoute] string teamId)
-        {
-            var team = _teamStore.Read(teamId);
-            var roles = team.Players;
-
-            return new JsonResult(roles);
         }
 
         [HttpPost("CreatePlayer")]
@@ -91,13 +78,23 @@ namespace MITBeerGame.Api.Controllers
             }
 
             var player = new Player(input.PlayerName, Helpers.GetRoleType(input.PlayerRole));
-            _teamStore.AddPlayer(input.TeamId, player);
-            
-            team = _teamStore.Read(input.TeamId);
+            _teamStore.CreatePlayer(input.TeamId, player);
 
-            await _gameHub.Clients.All.UpdatePlayers(team);
+            var teams = _teamStore.ReadAll();
+            await _gameHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(team);
+        }
+
+        [HttpPost("DeletePlayer")]
+        public async Task<IActionResult> DeletePlayer([FromBody] DeletePlayerInput input)
+        {
+            _teamStore.DeletePlayer(input.TeamId, input.PlayerId);
+
+            var teams = _teamStore.ReadAll();
+            await _gameHub.Clients.All.UpdateTeams(teams);
+
+            return new JsonResult(input.PlayerId);
         }
     }
 }

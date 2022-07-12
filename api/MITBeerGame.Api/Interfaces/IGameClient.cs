@@ -4,8 +4,7 @@ namespace MITBeerGame.Api.Interfaces
 {
     public interface IGameClient
     {
-        Task UpdateGames(IEnumerable<Game> teams);
+        Task UpdateGames(IEnumerable<Game> games);
         Task UpdateTeams(IEnumerable<Team> teams);
-        Task UpdatePlayers(Team team);
     }
 }

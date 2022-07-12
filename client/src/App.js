@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React from 'react';
 import './App.css';
 
-import { GamesView } from './components/Games/Games';
+import { GameView } from './components/Game/Game';
 import { TeamView } from './components/Team/Team';
 import { PlayerView } from './components/Player/Player';
 import { AppDataContextProvider } from './components/Contexts/AppDataContext';
@@ -12,9 +12,9 @@ function App() {
     <Router>
       <AppDataContextProvider>
         <Routes>
-          <Route path="/" element={<GamesView />} />
+          <Route path="/" element={<GameView />} />
           <Route path="/Game/:gameId" element={<TeamView />} />
-          <Route path="/Team/:teamId" element={<PlayerView />} />
+          <Route path="/Team/:gameId/:teamId" element={<PlayerView />} />
         </Routes>
       </AppDataContextProvider>
     </Router>

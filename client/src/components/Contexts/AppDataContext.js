@@ -1,11 +1,10 @@
-import { createContext, useState, useEffect, useContext, useCallback } from "react";
+import { createContext, useState, useEffect, useContext, useCallback, useMemo } from "react";
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams, UpdatePlayers } from '../../Constants'
+import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams } from '../../Constants'
 
 const getGamesEndpoint = 'Game/GetGames'
 const getTeamsEndpoint = 'Game/GetTeams'
-const getPlayersEndpoint = 'Game/GetPlayers'
 
 export const AppDataContext = createContext(undefined);
 
@@ -16,16 +15,6 @@ export const AppDataContextProvider = (props) => {
 
   const [games, setGames] = useState([]);
   const [teams, setTeams] = useState([]);
-  const [players, setPlayers] = useState([]);
-
-  const [gameId, setGameId] = useState('');
-  const [teamId, setTeamId] = useState('');
-  const [playerId, setPlayerId] = useState('');
-
-  const [game, setGame] = useState('');
-  const [team, setTeam] = useState('');
-  const [player, setPlayer] = useState('');
-
 
   const createConnection = () => {
     const hubConnection = new HubConnectionBuilder()
@@ -44,22 +33,11 @@ export const AppDataContextProvider = (props) => {
   }, []);
 
   const getTeams = useCallback(() => {
-    if (!gameId) return;
-
-    fetch(HostName + getTeamsEndpoint + `/${gameId}`, GetHeaders)
+    fetch(HostName + getTeamsEndpoint, GetHeaders)
       .then(response => response
         .json()
         .then(data => setTeams(data)));
-  }, [gameId]);
-
-  const getPlayers = useCallback(() => {
-    if (!teamId) return;
-
-    fetch(HostName + getPlayersEndpoint + `/${teamId}`, GetHeaders)
-      .then(response => response
-        .json()
-        .then(data => setPlayers(data)));
-  }, [teamId]);
+  }, []);
 
   useEffect(() => {
     if (!!connection && connection.state !== Connected) {
@@ -74,10 +52,6 @@ export const AppDataContextProvider = (props) => {
           connection.on(UpdateTeams, data => {
             setTeams(data);
           });
-
-          connection.on(UpdatePlayers, data => {
-            setPlayers(data.players);
-          });
         })
         .catch(e => {
           console.log(e);
@@ -89,39 +63,54 @@ export const AppDataContextProvider = (props) => {
     createConnection(HostName);
     getGames();
     getTeams();
-    getPlayers();
-  }, [getGames, getTeams, getPlayers]);
+  }, [getGames, getTeams]);
 
-  useEffect(() => {
-    if (games.length === 0 || !gameId) return;
+  const getGameById = (gameId) => {
+    if (games.length === 0) return undefined;
 
-    const currentGame = games.filter(g => g.id === gameId);
-    if (!currentGame || currentGame.length !== 1) return;
+    const game = games.filter(g => g.id === gameId);
+    if (!game || game.length !== 1) return undefined;
 
-    setGame(currentGame[0]);
-  }, [games, gameId])
+    return game[0];
+  };
 
-  useEffect(() => {
-    if (teams.length === 0 || !teamId) return;
+  const getTeamsByGameId = (gameId) => {
+    if (teams.length === 0) return [];
 
-    const currentTeam = teams.filter(g => g.id === teamId);
-    if (!currentTeam || currentTeam.length !== 1) return;
+    const filteredTeams = teams.filter(t => t.gameId === gameId);
+    if (!filteredTeams || filteredTeams.length === 0) return [];
 
-    setTeam(currentTeam[0]);
-  }, [teams, teamId])
+    return filteredTeams;
+  };
+
+  const getTeamById = (teamId) => {
+    if (teams.length === 0) return undefined;
+
+    const team = teams.filter(t => t.id === teamId);
+    if (!team || team.length !== 1) return undefined;
+
+    return team[0];
+  };
+
+  const getPlayerById = (playerId) => {
+    if (teams.length === 0) return undefined;
+
+    const team = teams.filter(t => t.players.some(p => p.id === playerId));
+    if (!team || team.length !== 1) return undefined;
+
+    const player = team[0].players.filter(p => p.id === playerId);
+    return player[0];
+  };
 
   return (
     <AppDataContext.Provider
       value={{
         games,
         teams,
-        players,
-        setGameId,
-        setTeamId,
-        setPlayerId,
-        game,
-        team,
-        player,
+        getGameById,
+        getTeamsByGameId,
+        getTeamById,
+        getPlayerById
       }}
     >
       {children}

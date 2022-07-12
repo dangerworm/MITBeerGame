@@ -2,9 +2,11 @@
 {
     public class Team
     {
-        public Team(string name)
+        public Team(string gameId, string name)
         {
             Id = Guid.NewGuid().ToString()[..6];
+
+            GameId = gameId;
 
             Name = name;
 
@@ -12,6 +14,8 @@
         }
 
         public string Id { get; }
+
+        public string GameId { get; }
 
         public string Name { get; }
 

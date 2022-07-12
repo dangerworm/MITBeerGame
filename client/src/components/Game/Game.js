@@ -2,25 +2,26 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { HostName, PostHeaders } from '../../Constants'
+import { HalfWidth } from '../../Styles'
 import { useAppDataContext } from '../Contexts/AppDataContext';
 
 import AppPage from '../AppPage/AppPage';
 
 const createGameEndpoint = 'Game/CreateGame';
 
-export const GamesView = () => {
+export const GameView = () => {
   const { games } = useAppDataContext();
 
   return (
     <AppPage>
-      <Games 
-        games={games} 
+      <Game
+        games={games}
       />
     </AppPage>
   )
 }
 
-const Games = (props) => {
+const Game = (props) => {
   const { games } = props;
 
   const [gameName, setGameName] = useState('');
@@ -48,19 +49,21 @@ const Games = (props) => {
 
   return (
     <div>
-      <h2>New Game</h2>
-      <form onSubmit={onSubmit}>
-        <label htmlFor={gameName}>Name your game:</label>
-        <br />
-        <input id="gameName" name="gameName" value={gameName} onChange={onGameNameUpdate} />
-        <br />
-        <br />
-        <button>Submit</button>
-      </form>
+      <div style={HalfWidth}>
+        <h3>New Game</h3>
+        <form onSubmit={onSubmit}>
+          <label htmlFor={gameName}>Name your game:</label>
+          <br />
+          <input id="gameName" name="gameName" value={gameName} onChange={onGameNameUpdate} />
+          <br />
+          <br />
+          <button>Submit</button>
+        </form>
+      </div>
 
       {games.length > 0 &&
-        <div>
-          <h2 style={{ marginBottom: "4pt" }}>Current Games</h2>
+        <div style={HalfWidth}>
+          <h3 style={{ marginBottom: "4pt" }}>Current Games</h3>
           <ul>
             {games.map(g =>
               <Link key={`link-${g.id}`} to={`/Game/${g.id}`}>

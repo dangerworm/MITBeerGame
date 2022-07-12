@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { HostName, PostHeaders } from '../../Constants'
+import { HalfWidth } from '../../Styles';
 import { useAppDataContext } from '../Contexts/AppDataContext';
 
 import AppPage from '../AppPage/AppPage';
@@ -10,26 +11,31 @@ const createTeamEndpoint = 'Game/CreateTeam';
 
 export const TeamView = (props) => {
   const { gameId } = useParams();
-  const { setGameId, teams } = useAppDataContext();
-
-  useEffect(() => {
-    setGameId(gameId);
-  }, [setGameId, gameId]);
+  const { getGameById, getTeamsByGameId } = useAppDataContext();
 
   return (
     <AppPage>
       <Teams
         gameId={gameId}
-        teams={teams}
+        getGameById={getGameById}
+        getTeamsByGameId={getTeamsByGameId}
       />
     </AppPage>
   );
 }
 
 export const Teams = (props) => {
-  const { gameId, teams } = props;
+  const { gameId, getGameById, getTeamsByGameId } = props;
 
   const [teamName, setTeamName] = useState([]);
+
+  const game = useMemo(() =>
+    getGameById(gameId)
+    , [gameId, getGameById])
+
+  const teams = useMemo(() =>
+    getTeamsByGameId(gameId)
+    , [gameId, getTeamsByGameId])
 
   const onTeamNameUpdate = (event) => {
     setTeamName(event.target.value);
@@ -55,24 +61,31 @@ export const Teams = (props) => {
 
   return (
     <div>
-      <h2>New Team</h2>
-      <form onSubmit={onSubmit}>
-        <label htmlFor={teamName}>Name your team:</label>
-        <br />
-        <input id="teamName" name="teamName" value={teamName} onChange={onTeamNameUpdate} />
-        <br />
-        <br />
-        <button>Submit</button>
-      </form>
+      <Link to={'/'}>
+        <h2>{game?.name}</h2>
+      </Link>
+      <div style={HalfWidth}>
+        <h3>New Team</h3>
+        <form onSubmit={onSubmit}>
+          <label htmlFor={teamName}>Name your team:</label>
+          <br />
+          <input id="teamName" name="teamName" value={teamName} onChange={onTeamNameUpdate} />
+          <br />
+          <br />
+          <button>Submit</button>
+        </form>
+      </div>
 
       {teams.length > 0 &&
-        <div>
-          <h2 style={{ marginBottom: "4pt" }}>Current Teams</h2>
+        <div style={HalfWidth}>
+          <h3 style={{ marginBottom: "4pt" }}>Current Teams</h3>
           <ul>
             {teams.map(t =>
-              <Link key={`link-${t.id}`} to={`/Team/${t.id}`}>
-                <li key={t.id}>{t.name}</li>
-              </Link>
+              <li key={t.id}>
+                <Link key={`link-${t.id}`} to={`/Team/${gameId}/${t.id}`}>
+                  {t.name}
+                </Link>
+              </li>
             )}
           </ul>
         </div>
