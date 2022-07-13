@@ -6,5 +6,6 @@ namespace MITBeerGame.Api.Interfaces
     {
         Task UpdateGames(IEnumerable<Game> games);
         Task UpdateTeams(IEnumerable<Team> teams);
+        Task UpdateEvents(IEnumerable<GameEvent> gameEvents);
     }
 }

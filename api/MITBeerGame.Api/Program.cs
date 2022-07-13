@@ -24,6 +24,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IGameStore, GameStore>();
 builder.Services.AddSingleton<ITeamStore, TeamStore>();
+builder.Services.AddSingleton<IGameEventStore, GameEventStore>();
 
 var app = builder.Build();
 

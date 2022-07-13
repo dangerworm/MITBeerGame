@@ -10,13 +10,13 @@ import AppPage from '../AppPage/AppPage';
 const createPlayerEndpoint = 'Game/CreatePlayer';
 const deletePlayerEndpoint = 'Game/DeletePlayer';
 
-export const PlayerView = (props) => {
+export const PlayersView = (props) => {
   const { gameId, teamId } = useParams();
   const { getTeamById } = useAppDataContext();
 
   return (
     <AppPage>
-      <Player
+      <Players
         gameId={gameId}
         teamId={teamId}
         getTeamById={getTeamById}
@@ -24,7 +24,8 @@ export const PlayerView = (props) => {
     </AppPage>
   );
 }
-export const Player = (props) => {
+
+export const Players = (props) => {
   const { gameId, teamId, getTeamById } = props;
 
   const [name, setName] = useState('');
@@ -81,9 +82,9 @@ export const Player = (props) => {
         <h2>{team?.name}</h2>
       </Link>
       <div style={HalfWidth}>
-        <h3>New Player</h3>
+        <h3 style={{ marginBottom: "4pt" }}>New Player</h3>
         <form onSubmit={onAddPlayer}>
-          <label htmlFor={name}>Name:</label>
+          <label htmlFor="name">Name:</label>
           <br />
           <input id="name" name="name" value={name} onChange={onNameUpdate} />
           <br />
@@ -91,7 +92,7 @@ export const Player = (props) => {
           <br />
           <input readOnly id="teamName" name="teamName" value={team?.name} />
           <br />
-          <label htmlFor={role}>Role:</label>
+          <label htmlFor="role">Role:</label>
           <br />
           <input id="role-vendor" name="role" type="radio" radioGroup="roles" value={role === "vendor"} onChange={_ => onRoleUpdate('vendor')} />
           <label htmlFor="role-vendor">Vendor</label>
@@ -116,7 +117,7 @@ export const Player = (props) => {
           <ul>
             {team.players.map(p =>
               <li key={p.id}>
-                <Link key={`link-${p.id}`} to={`/Player/${gameId}/${teamId}/${p.id}`}>
+                <Link key={`link-${p.id}`} to={`/Play/${gameId}/${teamId}/${p.id}`}>
                   {p.playerName} is the {p.role}
                 </Link>
                 <span onClick={e => onRemovePlayer(e, p.id)}> &nbsp; x</span>

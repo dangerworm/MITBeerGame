@@ -9,7 +9,7 @@ import AppPage from '../AppPage/AppPage';
 
 const createTeamEndpoint = 'Game/CreateTeam';
 
-export const TeamView = (props) => {
+export const TeamsView = (props) => {
   const { gameId } = useParams();
   const { getGameById, getTeamsByGameId } = useAppDataContext();
 
@@ -65,7 +65,7 @@ export const Teams = (props) => {
         <h2>{game?.name}</h2>
       </Link>
       <div style={HalfWidth}>
-        <h3>New Team</h3>
+        <h3 style={{ marginBottom: "4pt" }}>New Team</h3>
         <form onSubmit={onSubmit}>
           <label htmlFor={teamName}>Name your team:</label>
           <br />
@@ -82,7 +82,7 @@ export const Teams = (props) => {
           <ul>
             {teams.map(t =>
               <li key={t.id}>
-                <Link key={`link-${t.id}`} to={`/Team/${gameId}/${t.id}`}>
+                <Link key={`link-${t.id}`} to={`/Players/${gameId}/${t.id}`}>
                   {t.name}
                 </Link>
               </li>

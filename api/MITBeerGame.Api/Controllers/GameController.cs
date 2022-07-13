@@ -14,13 +14,15 @@ namespace MITBeerGame.Api.Controllers
 
         private readonly IGameStore _gameStore;
         private readonly ITeamStore _teamStore;
+        private readonly IGameEventStore _gameEventStore;
 
-        public GameController(IHubContext<GameHub, IGameClient> gameHub, IGameStore gameStore, ITeamStore teamStore)
+        public GameController(IHubContext<GameHub, IGameClient> gameHub, IGameStore gameStore, ITeamStore teamStore, IGameEventStore gameEventStore)
         {
             _gameHub = gameHub;
 
             _gameStore = gameStore;
             _teamStore = teamStore;
+            _gameEventStore = gameEventStore;
         }
 
         [HttpGet("GetGames")]
@@ -95,6 +97,34 @@ namespace MITBeerGame.Api.Controllers
             await _gameHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(input.PlayerId);
+        }
+
+        [HttpGet("GetEvents")]
+        public async Task<IActionResult> GetEvents()
+        {
+            var teams = _gameEventStore.ReadAll();
+
+            return new JsonResult(teams);
+        }
+
+        [HttpPost("CreateOrder")]
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderInput input)
+        {
+            // TODO: Validate that the order is expected at this time and
+            // won't cause two orders to be created in the same round
+
+            var player = _teamStore
+                .Read(input.TeamId)
+                .Players
+                .First(p => p.Id == input.PlayerId);
+
+            var gameEvent = new GameEvent(input.GameId, input.TeamId, player, input.OrderAmount);
+            _gameEventStore.Create(gameEvent);
+
+            var gameEvents = _gameEventStore.ReadAll();
+            await _gameHub.Clients.All.UpdateEvents(gameEvents);
+
+            return new JsonResult(gameEvent);
         }
     }
 }

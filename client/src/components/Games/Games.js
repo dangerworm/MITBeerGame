@@ -9,19 +9,19 @@ import AppPage from '../AppPage/AppPage';
 
 const createGameEndpoint = 'Game/CreateGame';
 
-export const GameView = () => {
+export const GamesView = () => {
   const { games } = useAppDataContext();
 
   return (
     <AppPage>
-      <Game
+      <Games
         games={games}
       />
     </AppPage>
   )
 }
 
-const Game = (props) => {
+const Games = (props) => {
   const { games } = props;
 
   const [gameName, setGameName] = useState('');
@@ -50,7 +50,7 @@ const Game = (props) => {
   return (
     <div>
       <div style={HalfWidth}>
-        <h3>New Game</h3>
+        <h3 style={{ marginBottom: "4pt" }}>New Game</h3>
         <form onSubmit={onSubmit}>
           <label htmlFor={gameName}>Name your game:</label>
           <br />
@@ -66,7 +66,7 @@ const Game = (props) => {
           <h3 style={{ marginBottom: "4pt" }}>Current Games</h3>
           <ul>
             {games.map(g =>
-              <Link key={`link-${g.id}`} to={`/Game/${g.id}`}>
+              <Link key={`link-${g.id}`} to={`/Teams/${g.id}`}>
                 <li key={g.id}>{g.name}</li>
               </Link>
             )}
