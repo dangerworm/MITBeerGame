@@ -6,12 +6,12 @@ import { GamesView } from './components/Games/Games';
 import { TeamsView } from './components/Teams/Teams';
 import { PlayersView } from './components/Players/Players';
 import { PlayView } from './components/Play/Play';
-import { AppDataContextProvider } from './components/Contexts/AppDataContext';
+import { GameSetupDataContextProvider } from './components/Contexts/GameSetupDataContext';
 
 function App() {
   return (
     <Router>
-      <AppDataContextProvider>
+      <GameSetupDataContextProvider>
         <Routes>
           <Route path="/" element={<GamesView />} />
           <Route path="/Games" element={<GamesView />} />
@@ -19,7 +19,7 @@ function App() {
           <Route path="/Players/:gameId/:teamId" element={<PlayersView />} />
           <Route path="/Play/:gameId/:teamId/:playerId" element={<PlayView />} />
         </Routes>
-      </AppDataContextProvider>
+      </GameSetupDataContextProvider>
     </Router>
   );
 }

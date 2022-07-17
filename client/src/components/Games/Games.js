@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 import { HostName, PostHeaders } from '../../Constants'
 import { HalfWidth } from '../../Styles'
-import { useAppDataContext } from '../Contexts/AppDataContext';
+import { useGameSetupDataContext } from '../Contexts/GameSetupDataContext';
 
 import AppPage from '../AppPage/AppPage';
 
-const createGameEndpoint = 'Game/CreateGame';
+const createGameEndpoint = 'GameSetup/CreateGame';
 
 export const GamesView = () => {
-  const { games } = useAppDataContext();
+  const { games } = useGameSetupDataContext();
 
   return (
     <AppPage>

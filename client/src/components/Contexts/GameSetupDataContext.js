@@ -3,20 +3,18 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 
 import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams, UpdateEvents } from '../../Constants'
 
-const getGamesEndpoint = 'Game/GetGames';
-const getTeamsEndpoint = 'Game/GetTeams';
-const getEventsEndpoint = 'Game/GetEvents';
+const getGamesEndpoint = 'GameSetup/GetGames';
+const getTeamsEndpoint = 'GameSetup/GetTeams';
 
-export const AppDataContext = createContext(undefined);
+export const GameSetupDataContext = createContext(undefined);
 
-export const AppDataContextProvider = (props) => {
+export const GameSetupDataContextProvider = (props) => {
   const { children } = props;
 
   const [connection, setConnection] = useState(null);
 
   const [games, setGames] = useState([]);
   const [teams, setTeams] = useState([]);
-  const [events, setEvents] = useState([]);
 
   const createConnection = () => {
     const hubConnection = new HubConnectionBuilder()
@@ -41,13 +39,6 @@ export const AppDataContextProvider = (props) => {
         .then(data => setTeams(data)));
   }, []);
 
-  const getEvents = useCallback(() => {
-    fetch(HostName + getEventsEndpoint, GetHeaders)
-      .then(response => response
-        .json()
-        .then(data => setEvents(data)));
-  }, []);
-
   useEffect(() => {
     if (!!connection && connection.state !== Connected) {
       connection.start()
@@ -61,10 +52,6 @@ export const AppDataContextProvider = (props) => {
           connection.on(UpdateTeams, data => {
             setTeams(data);
           });
-
-          connection.on(UpdateEvents, data => {
-            setEvents(data);
-          })
         })
         .catch(e => {
           console.log(e);
@@ -76,8 +63,7 @@ export const AppDataContextProvider = (props) => {
     createConnection(HostName);
     getGames();
     getTeams();
-    getEvents();
-  }, [getGames, getTeams, getEvents]);
+  }, [getGames, getTeams]);
 
   const getGameById = (gameId) => {
     if (games.length === 0) return undefined;
@@ -117,24 +103,22 @@ export const AppDataContextProvider = (props) => {
   };
 
   return (
-    <AppDataContext.Provider
+    <GameSetupDataContext.Provider
       value={{
         games,
         teams,
-        events,
         getGameById,
         getTeamsByGameId,
         getTeamById,
-        getPlayerById,
-        getEvents
+        getPlayerById
       }}
     >
       {children}
-    </AppDataContext.Provider>
+    </GameSetupDataContext.Provider>
   )
 }
 
-export const useAppDataContext = () => {
-  const context = useContext(AppDataContext);
+export const useGameSetupDataContext = () => {
+  const context = useContext(GameSetupDataContext);
   if (context) return context;
 }

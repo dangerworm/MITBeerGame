@@ -3,16 +3,16 @@ import { Link, useParams } from 'react-router-dom';
 
 import { HostName, PostHeaders } from '../../Constants'
 import { HalfWidth } from '../../Styles'
-import { useAppDataContext } from '../Contexts/AppDataContext';
+import { useGameSetupDataContext } from '../Contexts/GameSetupDataContext';
 
 import AppPage from '../AppPage/AppPage';
 import { Status } from './Status';
 
-const createOrderEndpoint = 'Game/CreateOrder';
+const createOrderEndpoint = 'GameSetup/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
-  const { getPlayerById, getEvents } = useAppDataContext();
+  const { getPlayerById, getEvents } = useGameSetupDataContext();
 
   return (
     <AppPage>
