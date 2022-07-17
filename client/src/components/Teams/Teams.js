@@ -62,7 +62,7 @@ export const Teams = (props) => {
   return (
     <div>
       <Link to={'/'}>
-        <h2>{game?.name}</h2>
+        <h4>&laquo; Back to Games</h4>
       </Link>
       <div style={HalfWidth}>
         <h3 style={{ marginBottom: "4pt" }}>New Team</h3>

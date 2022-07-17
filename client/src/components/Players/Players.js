@@ -78,8 +78,8 @@ export const Players = (props) => {
 
   return (
     <div>
-      <Link to={`/Game/${gameId}`}>
-        <h2>{team?.name}</h2>
+      <Link to={`/Teams/${gameId}`}>
+        <h4>&laquo; Back to Teams</h4>
       </Link>
       <div style={HalfWidth}>
         <h3 style={{ marginBottom: "4pt" }}>New Player</h3>
@@ -117,10 +117,20 @@ export const Players = (props) => {
           <ul>
             {team.players.map(p =>
               <li key={p.id}>
-                <Link key={`link-${p.id}`} to={`/Play/${gameId}/${teamId}/${p.id}`}>
-                  {p.playerName} is the {p.role}
-                </Link>
-                <span onClick={e => onRemovePlayer(e, p.id)}> &nbsp; x</span>
+                {!!team && team.players.length === 4 &&
+                  <span>
+                    <Link key={`link-${p.id}`} to={`/Play/${gameId}/${teamId}/${p.id}`}>
+                      {p.playerName} is the {p.role}
+                    </Link>
+                  </span>
+                }
+                {(!team || team.players.length < 4) &&
+                  <span>
+                    {p.playerName} is the {p.role}
+                  </span>
+                }
+
+                <span onClick={e => onRemovePlayer(e, p.id)}>&nbsp; [x]</span>
               </li>
             )}
           </ul>

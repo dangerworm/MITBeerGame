@@ -80,7 +80,7 @@ export const Play = (props) => {
   return (
     <div>
       <Link to={`/Players/${gameId}/${teamId}`}>
-        <h2>{player?.playerName}</h2>
+        <h4>&laquo; Back to Players</h4>
       </Link>
 
       <div style={HalfWidth}>
