@@ -1,5 +1,6 @@
 ﻿using MITBeerGame.Api.Interfaces;
 using MITBeerGame.Api.Models;
+using MITBeerGame.Api.Services;
 
 namespace MITBeerGame.Api.Stores
 {
@@ -44,6 +45,31 @@ namespace MITBeerGame.Api.Stores
         public void Delete(string id)
         {
             _games.Remove(id);
+        }
+
+        public void StartGame(string gameId, int roundLengthSeconds)
+        {
+            if (_games[gameId].GameTimer == null)
+            {
+                _games[gameId].GameTimer = new GameTimer(roundLengthSeconds);
+            }
+        }
+
+        public void AddEvent(GameEvent gameEvent)
+        {
+            var gameEvents = _games[gameEvent.GameId].GameEvents;
+            
+            var existingEvent = gameEvents.SingleOrDefault(ge => 
+                ge.TeamId == gameEvent.TeamId &&
+                ge.Player.Id == gameEvent.Player.Id &&
+                ge.RoundNumber == gameEvent.RoundNumber);
+
+            if (existingEvent != null)
+            {
+                gameEvents.Remove(existingEvent);
+            }
+
+            _games[gameEvent.GameId].GameEvents.Add(gameEvent);
         }
     }
 }

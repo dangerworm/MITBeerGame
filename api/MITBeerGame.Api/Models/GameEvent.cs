@@ -4,13 +4,16 @@ namespace MITBeerGame.Api.Models
 {
     public class GameEvent
     {
-        public GameEvent(string gameId, string teamId, Player player, int orderAmount)
+        public GameEvent(string gameId, string teamId,  Player player, int roundNumber, int orderAmount)
         {
             Id = Guid.NewGuid().ToString();
             DateTime = DateTime.Now;
+
             GameId = gameId;
             TeamId = teamId;
             Player = player;
+
+            RoundNumber = roundNumber;
             OrderAmount = orderAmount;
         }
 
@@ -20,6 +23,7 @@ namespace MITBeerGame.Api.Models
         public string TeamId { get; }
         public Player Player { get; }
 
+        public int RoundNumber { get; }
         public int OrderAmount { get; }
 
     }

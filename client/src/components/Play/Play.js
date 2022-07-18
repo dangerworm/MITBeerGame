@@ -4,49 +4,73 @@ import { Link, useParams } from 'react-router-dom';
 import { HostName, PostHeaders } from '../../Constants'
 import { HalfWidth } from '../../Styles'
 import { useGameSetupDataContext } from '../Contexts/GameSetupDataContext';
+import { useGameplayDataContext } from '../Contexts/GameplayDataContext';
 
 import AppPage from '../AppPage/AppPage';
 import { Status } from './Status';
 
-const createOrderEndpoint = 'GameSetup/CreateOrder';
+const startGameEndpoint = 'Gameplay/StartGame';
+const getRoundNumberEndpoint = 'Gameplay/GetRoundNumber';
+const getEventsEndpoint = 'Gameplay/GetEvents';
+const createOrderEndpoint = 'Gameplay/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
-  const { getPlayerById, getEvents } = useGameSetupDataContext();
+  const { getPlayerById } = useGameSetupDataContext();
 
   return (
     <AppPage>
-      <Play
-        gameId={gameId}
-        teamId={teamId}
-        playerId={playerId}
-        getPlayerById={getPlayerById}
-        getEvents={getEvents}
-      />
-    </AppPage>
+        <Play
+          gameId={gameId}
+          teamId={teamId}
+          playerId={playerId}
+          getPlayerById={getPlayerById}
+        />
+    </AppPage >
   );
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, getPlayerById, events } = props;
+  const { gameId, teamId, playerId, getPlayerById } = props;
 
-  const [ lastEvent, setLastEvent ] = useState({});
-  const [ orderAmount, setOrderAmount ] = useState(0);
+  const [lastEvent, setLastEvent] = useState(undefined);
+  const [orderAmount, setOrderAmount] = useState(0);
+  const [roundNumber, setRoundNumber] = useState(undefined);
+  const [events, setEvents] = useState(undefined);
 
-  const player = useMemo(() => 
+  const player = useMemo(() =>
     getPlayerById(playerId)
-  , [playerId, getPlayerById]);
+    , [playerId, getPlayerById]);
 
-  const onOrderUpdate = (event) => {
-    setOrderAmount(event.target.value);
-  }
+  const getRoundNumber = useCallback(() => {
+    fetch(HostName + getRoundNumberEndpoint, {
+      ...PostHeaders,
+      body: JSON.stringify({ gameId })
+    })
+      .then(response => response
+        .json()
+        .then(data => setRoundNumber(data)))
+  }, [gameId]);
 
-  const submitOrder = useCallback(async () => {
-    await fetch(HostName + createOrderEndpoint, {
+  const getEvents = useCallback(() => {
+    fetch(HostName + getEventsEndpoint, {
+      ...PostHeaders,
+      body: JSON.stringify({ gameId, teamId, playerId })
+    })
+      .then(response => response
+        .json()
+        .then(data => setEvents(data)))
+  }, [gameId, teamId, playerId]);
+
+  const createOrder = useCallback(() => {
+    fetch(HostName + getEventsEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ gameId, teamId, playerId, orderAmount: parseInt(orderAmount) })
-    });
-  }, [gameId, teamId, playerId, orderAmount])
+    })
+      .then(response => response
+        .json()
+        .then(data => setEvents(data)))
+  }, [gameId, teamId, playerId, orderAmount]);
 
   useEffect(() => {
     if (!events || events.length === 0) {
@@ -59,8 +83,12 @@ export const Play = (props) => {
     }
 
     setLastEvent(newLastEvent);
-    submitOrder();
-  }, [events, lastEvent, setLastEvent, submitOrder])
+    createOrder();
+  }, [events, lastEvent, setLastEvent, createOrder]);
+
+  const onOrderUpdate = (event) => {
+    setOrderAmount(event.target.value);
+  }
 
   const onSubmitOrder = (event) => {
     event.preventDefault();
@@ -70,7 +98,7 @@ export const Play = (props) => {
     const isOrderAnInteger = order - Math.floor(parseFloat(orderAmount)) === 0;
 
     if (!!order && isOrderANumber && isOrderAnInteger && order >= 0) {
-      submitOrder();
+      createOrder();
     }
     else {
       alert('Please order a positive whole number of units');
@@ -84,7 +112,7 @@ export const Play = (props) => {
       </Link>
 
       <div style={HalfWidth}>
-        <h3>Current Status</h3>
+        <h3>Round {roundNumber}</h3>
         <Status events={events} />
         <form onSubmit={onSubmitOrder}>
           <label htmlFor="order">Next Order:</label>

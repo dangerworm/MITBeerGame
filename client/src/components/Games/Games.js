@@ -9,7 +9,7 @@ import AppPage from '../AppPage/AppPage';
 
 const createGameEndpoint = 'GameSetup/CreateGame';
 
-export const GamesView = () => {
+export const GamesView = (props) => {
   const { games } = useGameSetupDataContext();
 
   return (

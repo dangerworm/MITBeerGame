@@ -1,40 +1,35 @@
-import { createContext, useState, useEffect, useContext, useCallback } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams, UpdateEvents } from '../../Constants'
-
-const getEventsEndpoint = 'Gameplay/GetEvents';
+import { Connected, HostName, UpdateRoundNumber, UpdateEvents } from '../../Constants'
 
 export const GameplayDataContext = createContext(undefined);
 
 export const GameplayDataContextProvider = (props) => {
   const { children } = props;
 
-  const [connection, setConnection] = useState(null);
-
-  const [events, setEvents] = useState([]);
+  const [connection, setConnection] = useState(undefined);
+  const [roundNumber, setRoundNumber] = useState(undefined);
+  const [events, setEvents] = useState(undefined);
 
   const createConnection = () => {
     const hubConnection = new HubConnectionBuilder()
-      .withUrl(HostName + 'gameHub')
+      .withUrl(HostName + 'gameplayHub')
       .withAutomaticReconnect()
       .build();
 
     setConnection(hubConnection);
   }
 
-  const getEvents = useCallback(() => {
-    fetch(HostName + getEventsEndpoint, GetHeaders)
-      .then(response => response
-        .json()
-        .then(data => setEvents(data)));
-  }, []);
-
   useEffect(() => {
     if (!!connection && connection.state !== Connected) {
       connection.start()
         .then(_ => {
           console.log("Connected!");
+
+          connection.on(UpdateRoundNumber, data => {
+            setRoundNumber(data);
+          })
 
           connection.on(UpdateEvents, data => {
             setEvents(data);
@@ -44,17 +39,18 @@ export const GameplayDataContextProvider = (props) => {
           console.log(e);
         });
     }
-  }, [connection, setEvents])
+  }, [connection]);
+
 
   useEffect(() => {
     createConnection(HostName);
-    getEvents();
-  }, [getEvents]);
+  }, []);
 
   return (
     <GameplayDataContext.Provider
       value={{
-        events
+        roundNumber,
+        events,
       }}
     >
       {children}

@@ -1,4 +1,6 @@
-﻿namespace MITBeerGame.Api.Models
+﻿using MITBeerGame.Api.Services;
+
+namespace MITBeerGame.Api.Models
 {
     public class Game
     {
@@ -14,6 +16,8 @@
         public string Id { get; }
 
         public string Name { get; }
+
+        public GameTimer? GameTimer { get; set;  }
 
         public List<string> TeamIds { get; }
 

@@ -9,6 +9,7 @@ import AppPage from '../AppPage/AppPage';
 
 const createPlayerEndpoint = 'GameSetup/CreatePlayer';
 const deletePlayerEndpoint = 'GameSetup/DeletePlayer';
+const startGameEndpoint = 'Gameplay/StartGame';
 
 export const PlayersView = (props) => {
   const { gameId, teamId } = useParams();
@@ -31,9 +32,9 @@ export const Players = (props) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
 
-  const team = useMemo(() =>
-    getTeamById(teamId)
-    , [teamId, getTeamById])
+  const team = useMemo(() => {
+    return getTeamById(teamId)
+  }, [teamId, getTeamById]);
 
   const onNameUpdate = (event) => {
     setName(event.target.value);
@@ -54,6 +55,13 @@ export const Players = (props) => {
     await fetch(HostName + deletePlayerEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ teamId, playerId })
+    });
+  }
+
+  const startGame = async () => {
+    await fetch(HostName + startGameEndpoint, {
+      ...PostHeaders,
+      body: JSON.stringify({ gameId })
     });
   }
 
@@ -78,6 +86,9 @@ export const Players = (props) => {
 
   return (
     <div>
+      {!!team &&
+        <h2>{team.name}</h2>
+      }
       <Link to={`/Teams/${gameId}`}>
         <h4>&laquo; Back to Teams</h4>
       </Link>
@@ -137,8 +148,7 @@ export const Players = (props) => {
           {!!team && team.players.length === 4 &&
             <div>
               <br />
-              <h3 style={{ color: "green" }}>Let's play!</h3>
-              <p>Click your name to begin.</p>
+              <h3 style={{ color: "green" }} onClick={startGame}>Let's play!</h3>
             </div>
           }
         </div>

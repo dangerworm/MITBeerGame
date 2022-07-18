@@ -40,6 +40,7 @@ app.UseCors(Constants.CorsPolicy);
 app.MapControllers();
 app.UseRouting();
 
-app.MapHub<GameHub>("/gameHub");
+app.MapHub<GameSetupHub>("/gameSetupHub");
+app.MapHub<GameplayHub>("/gameplayHub");
 
 app.Run();

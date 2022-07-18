@@ -10,14 +10,14 @@ namespace MITBeerGame.Api.Controllers
     [Route("[controller]")]
     public class GameSetupController : ControllerBase
     {
-        private readonly IHubContext<GameHub, IGameClient> _gameHub;
+        private readonly IHubContext<GameSetupHub, IGameSetupClient> _gameSetupHub;
 
         private readonly IGameStore _gameStore;
         private readonly ITeamStore _teamStore;
 
-        public GameSetupController(IHubContext<GameHub, IGameClient> gameHub, IGameStore gameStore, ITeamStore teamStore, IGameEventStore gameEventStore)
+        public GameSetupController(IHubContext<GameSetupHub, IGameSetupClient> gameSetupHub, IGameStore gameStore, ITeamStore teamStore, IGameEventStore gameEventStore)
         {
-            _gameHub = gameHub;
+            _gameSetupHub = gameSetupHub;
 
             _gameStore = gameStore;
             _teamStore = teamStore;
@@ -28,6 +28,8 @@ namespace MITBeerGame.Api.Controllers
         {
             var games = _gameStore.ReadAll();
 
+            await _gameSetupHub.Clients.All.UpdateGames(games);
+
             return new JsonResult(games);
         }
 
@@ -37,7 +39,7 @@ namespace MITBeerGame.Api.Controllers
             var game = _gameStore.Create(input.GameName);
 
             var games = _gameStore.ReadAll();
-            await _gameHub.Clients.All.UpdateGames(games);
+            await _gameSetupHub.Clients.All.UpdateGames(games);
 
             return new JsonResult(game);
         }
@@ -46,6 +48,8 @@ namespace MITBeerGame.Api.Controllers
         public async Task<IActionResult> GetTeams()
         {
             var teams = _teamStore.ReadAll();
+
+            await _gameSetupHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(teams);
         }
@@ -63,7 +67,7 @@ namespace MITBeerGame.Api.Controllers
             _gameStore.AddTeam(input.GameId, team.Id);
 
             var teams = _teamStore.ReadAll();
-            await _gameHub.Clients.All.UpdateTeams(teams);
+            await _gameSetupHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(team);
         }
@@ -81,7 +85,7 @@ namespace MITBeerGame.Api.Controllers
             _teamStore.CreatePlayer(input.TeamId, player);
 
             var teams = _teamStore.ReadAll();
-            await _gameHub.Clients.All.UpdateTeams(teams);
+            await _gameSetupHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(team);
         }
@@ -92,7 +96,7 @@ namespace MITBeerGame.Api.Controllers
             _teamStore.DeletePlayer(input.TeamId, input.PlayerId);
 
             var teams = _teamStore.ReadAll();
-            await _gameHub.Clients.All.UpdateTeams(teams);
+            await _gameSetupHub.Clients.All.UpdateTeams(teams);
 
             return new JsonResult(input.PlayerId);
         }

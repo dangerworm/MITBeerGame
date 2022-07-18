@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect, useContext, useCallback } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
-import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams, UpdateEvents } from '../../Constants'
+import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams } from '../../Constants'
 
 const getGamesEndpoint = 'GameSetup/GetGames';
 const getTeamsEndpoint = 'GameSetup/GetTeams';
@@ -12,32 +12,17 @@ export const GameSetupDataContextProvider = (props) => {
   const { children } = props;
 
   const [connection, setConnection] = useState(null);
-
   const [games, setGames] = useState([]);
   const [teams, setTeams] = useState([]);
 
   const createConnection = () => {
     const hubConnection = new HubConnectionBuilder()
-      .withUrl(HostName + 'gameHub')
+      .withUrl(HostName + 'gameSetupHub')
       .withAutomaticReconnect()
       .build();
 
     setConnection(hubConnection);
   }
-
-  const getGames = useCallback(() => {
-    fetch(HostName + getGamesEndpoint, GetHeaders)
-      .then(response => response
-        .json()
-        .then(data => setGames(data)));
-  }, []);
-
-  const getTeams = useCallback(() => {
-    fetch(HostName + getTeamsEndpoint, GetHeaders)
-      .then(response => response
-        .json()
-        .then(data => setTeams(data)));
-  }, []);
 
   useEffect(() => {
     if (!!connection && connection.state !== Connected) {
@@ -57,13 +42,27 @@ export const GameSetupDataContextProvider = (props) => {
           console.log(e);
         });
     }
-  }, [connection, setGames, setTeams])
+  }, [connection])
+
+  const getGames = () => {
+    fetch(HostName + getGamesEndpoint, GetHeaders)
+      .then(response => response
+        .json()
+        .then(data => setGames(data)));
+  };
+
+  const getTeams = () => {
+    fetch(HostName + getTeamsEndpoint, GetHeaders)
+      .then(response => response
+        .json()
+        .then(data => setTeams(data)));
+  };
 
   useEffect(() => {
     createConnection(HostName);
     getGames();
     getTeams();
-  }, [getGames, getTeams]);
+  }, []);
 
   const getGameById = (gameId) => {
     if (games.length === 0) return undefined;

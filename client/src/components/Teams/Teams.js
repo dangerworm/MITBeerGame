@@ -29,13 +29,13 @@ export const Teams = (props) => {
 
   const [teamName, setTeamName] = useState([]);
 
-  const game = useMemo(() =>
-    getGameById(gameId)
-    , [gameId, getGameById])
+  const game = useMemo(() => {
+    return getGameById(gameId);
+  }, [getGameById, gameId]);
 
-  const teams = useMemo(() =>
-    getTeamsByGameId(gameId)
-    , [gameId, getTeamsByGameId])
+  const teams = useMemo(() => {
+    return getTeamsByGameId(gameId);
+  }, [gameId, getTeamsByGameId]);
 
   const onTeamNameUpdate = (event) => {
     setTeamName(event.target.value);
@@ -61,6 +61,9 @@ export const Teams = (props) => {
 
   return (
     <div>
+      {!!game &&
+        <h2>{game.name}</h2>
+      }
       <Link to={'/'}>
         <h4>&laquo; Back to Games</h4>
       </Link>
@@ -76,7 +79,7 @@ export const Teams = (props) => {
         </form>
       </div>
 
-      {teams.length > 0 &&
+      {!!teams && teams.length > 0 &&
         <div style={HalfWidth}>
           <h3 style={{ marginBottom: "4pt" }}>Current Teams</h3>
           <ul>

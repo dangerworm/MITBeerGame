@@ -10,12 +10,9 @@ export const SendMessage = 'SendMessage';
 
 export const UpdateGames = 'UpdateGames';
 export const UpdateTeams = 'UpdateTeams';
-export const UpdateEvents = 'UpdateEvents';
 
-export const Hubs = {
-  'NewGame': 'newgame',
-  'NewPlayer': 'newplayer'
-};
+export const UpdateRoundNumber = 'UpdateRoundNumber';
+export const UpdateEvents = 'UpdateEvents';
 
 export const GetHeaders = {
   method: 'GET',

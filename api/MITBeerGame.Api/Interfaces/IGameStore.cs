@@ -10,5 +10,7 @@ namespace MITBeerGame.Api.Interfaces
         void Delete(string id);
         
         void AddTeam(string gameId, string teamId);
+        void StartGame(string gameId, int roundLengthSeconds);
+        void AddEvent(GameEvent gameEvent);
     }
 }
