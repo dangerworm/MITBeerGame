@@ -2,6 +2,9 @@
 {
     public class GameEvent
     {
+        private int v1;
+        private string v2;
+
         public GameEvent(string gameId, int roundNumber, string description)
         {
             Id = Guid.NewGuid().ToString();
@@ -12,6 +15,14 @@
             RoundNumber = roundNumber;
 
             Description = description;
+        }
+
+        public GameEvent(string id, string teamId, int v1, string v2)
+        {
+            Id = id;
+            TeamId = teamId;
+            this.v1 = v1;
+            this.v2 = v2;
         }
 
         public GameEvent(string gameId, string teamId, Player player, int roundNumber, int orderAmount, string description = "")

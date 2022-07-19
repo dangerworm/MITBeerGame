@@ -47,7 +47,7 @@ namespace MITBeerGame.Api.Stores
             _games.Remove(id);
         }
 
-        public void StartGame(string gameId, string playerId, int roundLengthSeconds)
+        public (Game game, bool gameAlreadyStarted) StartGame(string gameId, string playerId, int roundLengthSeconds)
         {
             var game = _games[gameId];
 
@@ -61,11 +61,13 @@ namespace MITBeerGame.Api.Stores
             }
 
             var allPlayersReady = game.GameEvents.Count() == (game.TeamIds.Count() * 4);
-            if (allPlayersReady && game.GameTimer == null)
+            var gameAlreadyStarted = game.GameTimer != null;
+            if (allPlayersReady && !gameAlreadyStarted)
             {
                 game.GameTimer = new GameTimer(roundLengthSeconds);
-                game.GameEvents.Add(new GameEvent(gameId, 1, "Game started"));
             }
+
+            return (game, gameAlreadyStarted);
         }
 
         public void AddEvent(GameEvent gameEvent)

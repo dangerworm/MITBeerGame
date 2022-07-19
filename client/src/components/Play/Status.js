@@ -17,7 +17,7 @@ export const Status = (props) => {
     const lastEvent = events[events.length - 1];
 
     const totalRequired = events
-      .map(e => e.requred)
+      .map(e => e.required)
       .reduce((total, current) => total + current, 0);
 
     const totalDelivered = events

@@ -47,6 +47,9 @@ export const Play = (props) => {
     , [playerId, getPlayerById]);
 
   const roundNumber = useMemo(() => {
+    if (!events) {
+      return 0;
+    }
     const roundNumbers = events.map(e => e.roundNumber);
     return Math.max(...roundNumbers);
   }, [events]);
@@ -68,19 +71,25 @@ export const Play = (props) => {
       return;
     }
 
-    const newGameEvents = events.filter(e => !e.description || !e.description.includes('waiting'));
+    const newGameEvents = events
+      .filter(e =>
+        !(e.description && !e.description.includes('waiting')) &&
+        !!e.teamId && e.teamId === teamId &&
+        !!e.player && e.player.id === playerId
+      );
+
     newGameEvents.sort((a, b) => a.dateTime < b.dateTime ? -1 : 1);
 
     setGameEvents(newGameEvents);
 
-    const newLastEvent = events[events.length - 1];
+    const newLastEvent = newGameEvents[newGameEvents.length - 1];
     if (!lastEvent || newLastEvent.id === lastEvent.id) {
       return;
     }
 
     setLastEvent(newLastEvent);
     createOrder();
-  }, [events, lastEvent, setLastEvent, createOrder]);
+  }, [events, playerId, teamId, lastEvent, setLastEvent, createOrder]);
 
   const onOrderUpdate = (event) => {
     setOrderAmount(event.target.value);
@@ -114,7 +123,7 @@ export const Play = (props) => {
       }
       {!waitingForPlayers &&
         <>
-          <div style={HalfWidth}>
+          <div>
             <h3>Round {roundNumber}</h3>
             <Status events={gameEvents} />
             <form onSubmit={onSubmitOrder}>
@@ -127,8 +136,11 @@ export const Play = (props) => {
             </form>
           </div>
 
-          <div style={HalfWidth}>
-            <h3 style={{ marginBottom: "4pt" }}>Events</h3>
+          <br />
+          <hr />
+
+          <div>
+            <h3 style={{ marginBottom: "4pt" }}>Event History</h3>
             {!!gameEvents && gameEvents.map((event, index) =>
               <div key={event.id}>
                 <p><b>Event {gameEvents.length - index}</b></p>

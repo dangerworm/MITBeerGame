@@ -2,6 +2,7 @@
 {
     public enum RoleType
     {
+        Market,
         Vendor,
         Wholesaler,
         Distributor,
