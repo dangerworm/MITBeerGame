@@ -72,7 +72,11 @@ export const Players = (props) => {
     const isRoleProvided = role && role !== '';
 
     if (isNameProvided && isRoleProvided) {
-      createPlayer();
+      createPlayer()
+        .then(_ => {
+          setName('');
+          setRole('');
+        });
     }
     else {
       alert('Please type a name and team, and pick a role');
@@ -82,6 +86,10 @@ export const Players = (props) => {
   const onRemovePlayer = (event, playerId) => {
     event.preventDefault();
     deletePlayer(playerId);
+  }
+
+  if (!team) {
+    return;
   }
 
   return (
@@ -105,17 +113,13 @@ export const Players = (props) => {
           <br />
           <label htmlFor="role">Role:</label>
           <br />
-          <input id="role-vendor" name="role" type="radio" radioGroup="roles" value={role === "vendor"} onChange={_ => onRoleUpdate('vendor')} />
-          <label htmlFor="role-vendor">Vendor</label>
+          <RoleInput roleType={"Vendor"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <input id="role-wholesaler" name="role" type="radio" radioGroup="roles" value={role === "wholesaler"} onChange={_ => onRoleUpdate('wholesaler')} />
-          <label htmlFor="role-wholesaler">Wholesaler</label>
+          <RoleInput roleType={"Wholesaler"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <input id="role-distributor" name="role" type="radio" radioGroup="roles" value={role === "distributor"} onChange={_ => onRoleUpdate('distributor')} />
-          <label htmlFor="role-distributor">Distributor</label>
+          <RoleInput roleType={"Distributor"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <input id="role-brewery" name="role" type="radio" radioGroup="roles" value={role === "brewer"} onChange={_ => onRoleUpdate('brewer')} />
-          <label htmlFor="role-brewery">Brewer</label>
+          <RoleInput roleType={"Brewer"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
           <br />
           <br />
           <button>Submit</button>
@@ -154,5 +158,33 @@ export const Players = (props) => {
         </div>
       }
     </div >
+  )
+}
+
+export const RoleInput = (props) => {
+  const { roleType, selectedRole, players, onRoleUpdate } = props;
+  
+  if (!players){
+    return;
+  }
+  
+  const id = `role-${roleType}`; 
+  const roleTaken = players.some(p => p.role === roleType);
+  const selected = selectedRole === roleType && !roleTaken;
+
+  return (
+    <>
+      <input 
+        id={id}
+        name="role"
+        type="radio"
+        radioGroup="roles"
+        checked={selected}
+        value={selected}
+        disabled={roleTaken}
+        onChange={_ => onRoleUpdate(roleType)} 
+      />
+      <label htmlFor={id}>{roleType}</label>
+    </>
   )
 }
