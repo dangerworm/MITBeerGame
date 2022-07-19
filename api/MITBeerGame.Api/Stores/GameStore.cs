@@ -47,19 +47,32 @@ namespace MITBeerGame.Api.Stores
             _games.Remove(id);
         }
 
-        public void StartGame(string gameId, int roundLengthSeconds)
+        public void StartGame(string gameId, string playerId, int roundLengthSeconds)
         {
-            if (_games[gameId].GameTimer == null)
+            var game = _games[gameId];
+
+            var readyAndWaiting = ReadyAndWaiting(playerId);
+            var playerStateKnown = game.GameEvents.Any(ge => ge.Description == readyAndWaiting);
+
+            var addNewGameEvent = !playerStateKnown && game.GameEvents.Count() < (game.TeamIds.Count() * 4);
+            if (addNewGameEvent)
             {
-                _games[gameId].GameTimer = new GameTimer(roundLengthSeconds);
+                game.GameEvents.Add(new GameEvent(gameId, 0, readyAndWaiting));
+            }
+
+            var allPlayersReady = game.GameEvents.Count() == (game.TeamIds.Count() * 4);
+            if (allPlayersReady && game.GameTimer == null)
+            {
+                game.GameTimer = new GameTimer(roundLengthSeconds);
+                game.GameEvents.Add(new GameEvent(gameId, 1, "Game started"));
             }
         }
 
         public void AddEvent(GameEvent gameEvent)
         {
             var gameEvents = _games[gameEvent.GameId].GameEvents;
-            
-            var existingEvent = gameEvents.SingleOrDefault(ge => 
+
+            var existingEvent = gameEvents.SingleOrDefault(ge =>
                 ge.TeamId == gameEvent.TeamId &&
                 ge.Player.Id == gameEvent.Player.Id &&
                 ge.RoundNumber == gameEvent.RoundNumber);
@@ -70,6 +83,11 @@ namespace MITBeerGame.Api.Stores
             }
 
             _games[gameEvent.GameId].GameEvents.Add(gameEvent);
+        }
+
+        private static string ReadyAndWaiting(string playerId)
+        {
+            return $"{playerId} ready and waiting";
         }
     }
 }

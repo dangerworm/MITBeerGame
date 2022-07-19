@@ -1,7 +1,7 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { createContext, useState, useEffect, useContext, useCallback } from "react";
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
-import { Connected, HostName, UpdateRoundNumber, UpdateEvents } from '../../Constants'
+import { HostName, StartGame, RoundLengthSeconds, UpdateGameStates, UpdateRoundNumber, UpdateEvents } from '../../Constants'
 
 export const GameplayDataContext = createContext(undefined);
 
@@ -9,6 +9,7 @@ export const GameplayDataContextProvider = (props) => {
   const { children } = props;
 
   const [connection, setConnection] = useState(undefined);
+  const [gameStates, setGameStates] = useState(undefined);
   const [roundNumber, setRoundNumber] = useState(undefined);
   const [events, setEvents] = useState(undefined);
 
@@ -22,10 +23,14 @@ export const GameplayDataContextProvider = (props) => {
   }
 
   useEffect(() => {
-    if (!!connection && connection.state !== Connected) {
+    if (!!connection && connection.state !== HubConnectionState.Connected) {
       connection.start()
         .then(_ => {
           console.log("Connected!");
+
+          connection.on(UpdateGameStates, data => {
+            setGameStates(data);
+          })
 
           connection.on(UpdateRoundNumber, data => {
             setRoundNumber(data);
@@ -46,11 +51,22 @@ export const GameplayDataContextProvider = (props) => {
     createConnection(HostName);
   }, []);
 
+  const startGame = useCallback((gameId, playerId) => {
+    if (!connection || connection.state !== HubConnectionState.Connected) {
+      return;
+    }
+
+    connection.invoke(StartGame, gameId, playerId, RoundLengthSeconds)
+      .then(data => setGameStates(data));
+  }, [connection])
+
   return (
     <GameplayDataContext.Provider
       value={{
+        startGame,
+        gameStates,
         roundNumber,
-        events,
+        events
       }}
     >
       {children}

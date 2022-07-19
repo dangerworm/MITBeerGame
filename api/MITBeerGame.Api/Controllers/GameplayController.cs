@@ -26,17 +26,6 @@ namespace MITBeerGame.Api.Controllers
             _teamStore = teamStore;
         }
 
-        [HttpPost("StartGame")]
-        public async Task<IActionResult> StartGame([FromBody] StartGameInput input)
-        {
-            _gameStore.StartGame(input.GameId, input.RoundLengthSeconds);
-
-            var games = _gameStore.ReadAll();
-            await _gameSetupHub.Clients.All.UpdateGames(games);
-
-            return new JsonResult(input.GameId);
-        }
-
         [HttpPost("GetRoundNumber")]
         public async Task<IActionResult> GetRoundNumber([FromBody] GetRoundNumberInput input)
         {

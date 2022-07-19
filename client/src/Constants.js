@@ -11,6 +11,9 @@ export const SendMessage = 'SendMessage';
 export const UpdateGames = 'UpdateGames';
 export const UpdateTeams = 'UpdateTeams';
 
+export const StartGame = 'StartGame';
+export const RoundLengthSeconds = 30;
+export const UpdateGameStates = 'UpdateGameStates';
 export const UpdateRoundNumber = 'UpdateRoundNumber';
 export const UpdateEvents = 'UpdateEvents';
 

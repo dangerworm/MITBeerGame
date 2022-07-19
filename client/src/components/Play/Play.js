@@ -9,73 +9,69 @@ import { useGameplayDataContext } from '../Contexts/GameplayDataContext';
 import AppPage from '../AppPage/AppPage';
 import { Status } from './Status';
 
-const startGameEndpoint = 'Gameplay/StartGame';
 const getRoundNumberEndpoint = 'Gameplay/GetRoundNumber';
 const getEventsEndpoint = 'Gameplay/GetEvents';
-const createOrderEndpoint = 'Gameplay/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
   const { getPlayerById } = useGameSetupDataContext();
+  const { startGame, events } = useGameplayDataContext();
+
+  useEffect(() => {
+    startGame(gameId, playerId);
+  }, [startGame, gameId, playerId]);
 
   return (
     <AppPage>
-        <Play
-          gameId={gameId}
-          teamId={teamId}
-          playerId={playerId}
-          getPlayerById={getPlayerById}
-        />
+      <Play
+        gameId={gameId}
+        teamId={teamId}
+        playerId={playerId}
+        getPlayerById={getPlayerById}
+        events={events}
+      />
     </AppPage >
   );
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, getPlayerById } = props;
+  const { gameId, teamId, playerId, getPlayerById, events } = props;
 
   const [lastEvent, setLastEvent] = useState(undefined);
   const [orderAmount, setOrderAmount] = useState(0);
-  const [roundNumber, setRoundNumber] = useState(undefined);
-  const [events, setEvents] = useState(undefined);
+  const [waitingForPlayers, setWaitingForPlayers] = useState(undefined);
+  const [gameEvents, setGameEvents] = useState(undefined);
 
   const player = useMemo(() =>
     getPlayerById(playerId)
     , [playerId, getPlayerById]);
 
-  const getRoundNumber = useCallback(() => {
-    fetch(HostName + getRoundNumberEndpoint, {
-      ...PostHeaders,
-      body: JSON.stringify({ gameId })
-    })
-      .then(response => response
-        .json()
-        .then(data => setRoundNumber(data)))
-  }, [gameId]);
-
-  const getEvents = useCallback(() => {
-    fetch(HostName + getEventsEndpoint, {
-      ...PostHeaders,
-      body: JSON.stringify({ gameId, teamId, playerId })
-    })
-      .then(response => response
-        .json()
-        .then(data => setEvents(data)))
-  }, [gameId, teamId, playerId]);
+  const roundNumber = useMemo(() => {
+    const roundNumbers = events.map(e => e.roundNumber);
+    return Math.max(...roundNumbers);
+  }, [events]);
 
   const createOrder = useCallback(() => {
     fetch(HostName + getEventsEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ gameId, teamId, playerId, orderAmount: parseInt(orderAmount) })
-    })
-      .then(response => response
-        .json()
-        .then(data => setEvents(data)))
+    });
   }, [gameId, teamId, playerId, orderAmount]);
 
   useEffect(() => {
     if (!events || events.length === 0) {
       return;
     }
+
+    if (events.every(e => e.description && e.description.includes('waiting'))) {
+      setWaitingForPlayers(true);
+      return;
+    }
+
+    const newGameEvents = events.filter(e => !e.description || !e.description.includes('waiting'));
+    newGameEvents.sort((a, b) => a.dateTime < b.dateTime ? -1 : 1);
+
+    setGameEvents(newGameEvents);
 
     const newLastEvent = events[events.length - 1];
     if (!lastEvent || newLastEvent.id === lastEvent.id) {
@@ -111,25 +107,44 @@ export const Play = (props) => {
         <h4>&laquo; Back to Players</h4>
       </Link>
 
-      <div style={HalfWidth}>
-        <h3>Round {roundNumber}</h3>
-        <Status events={events} />
-        <form onSubmit={onSubmitOrder}>
-          <label htmlFor="order">Next Order:</label>
-          <br />
-          <input id="nextOrder" name="nextOrder" value={orderAmount} onChange={onOrderUpdate} />
-          <br />
-          <br />
-          <button>Submit</button>
-        </form>
-      </div>
+      {waitingForPlayers &&
+        <div>
+          <h3 style={{ color: "green" }}>Waiting for players...</h3>
+        </div>
+      }
+      {!waitingForPlayers &&
+        <>
+          <div style={HalfWidth}>
+            <h3>Round {roundNumber}</h3>
+            <Status events={gameEvents} />
+            <form onSubmit={onSubmitOrder}>
+              <label htmlFor="order">Next Order:</label>
+              <br />
+              <input id="nextOrder" name="nextOrder" value={orderAmount} onChange={onOrderUpdate} />
+              <br />
+              <br />
+              <button>Submit</button>
+            </form>
+          </div>
 
-      <div style={HalfWidth}>
-        <h3 style={{ marginBottom: "4pt" }}>Events</h3>
-        {!!events && events.map((event, index) =>
-          <Status events={events.slice(0, index + 1)} />
-        )}
-      </div>
-    </div >
+          <div style={HalfWidth}>
+            <h3 style={{ marginBottom: "4pt" }}>Events</h3>
+            {!!gameEvents && gameEvents.map((event, index) =>
+              <div key={event.id}>
+                <p><b>Event {gameEvents.length - index}</b></p>
+                {!!event.description && event.orderAmount === 0 ?
+                  (
+                    <span key={event.id}>
+                      <em>{event.description}</em>
+                    </span>
+                  ) :
+                  <Status key={event.id} events={gameEvents.slice(0, index + 1)} />
+                }
+              </div>
+            )}
+          </div>
+        </>
+      }
+    </div>
   )
 }

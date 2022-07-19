@@ -15,7 +15,7 @@ namespace MITBeerGame.Api.Controllers
         private readonly IGameStore _gameStore;
         private readonly ITeamStore _teamStore;
 
-        public GameSetupController(IHubContext<GameSetupHub, IGameSetupClient> gameSetupHub, IGameStore gameStore, ITeamStore teamStore, IGameEventStore gameEventStore)
+        public GameSetupController(IHubContext<GameSetupHub, IGameSetupClient> gameSetupHub, IGameStore gameStore, ITeamStore teamStore)
         {
             _gameSetupHub = gameSetupHub;
 

@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
-import { Connected, HostName, GetHeaders, UpdateGames, UpdateTeams } from '../../Constants'
+import { HostName, GetHeaders, UpdateGames, UpdateTeams } from '../../Constants'
 
 const getGamesEndpoint = 'GameSetup/GetGames';
 const getTeamsEndpoint = 'GameSetup/GetTeams';
@@ -25,7 +25,7 @@ export const GameSetupDataContextProvider = (props) => {
   }
 
   useEffect(() => {
-    if (!!connection && connection.state !== Connected) {
+    if (!!connection && connection.state !== HubConnectionState.Connected) {
       connection.start()
         .then(_ => {
           console.log("Connected!");
