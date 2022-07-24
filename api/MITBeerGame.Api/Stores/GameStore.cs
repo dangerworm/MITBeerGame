@@ -1,4 +1,5 @@
-﻿using MITBeerGame.Api.Interfaces;
+﻿using MITBeerGame.Api.Enums;
+using MITBeerGame.Api.Interfaces;
 using MITBeerGame.Api.Models;
 using MITBeerGame.Api.Services;
 
@@ -22,24 +23,24 @@ namespace MITBeerGame.Api.Stores
             return game;
         }
 
-        public Game Read(string id)
-        {
-            return _games[id];
-        }
-
         public IEnumerable<Game> ReadAll()
         {
             return _games.Values;
         }
 
-        public void AddTeam(string gameId, string teamId)
+        public Game Read(string id)
         {
-            _games[gameId].TeamIds.Add(teamId);
+            return _games[id];
         }
 
-        public void AddEvent(string gameId, GameEvent @event)
+        public Game ReadByPlayerId(string playerId)
         {
-            _games[gameId].GameEvents.Add(@event);
+            return _games.Values.First(g => g.Players.Select(p => p.Id).Contains(playerId));
+        }
+
+        public void StartGame(string gameId, int roundLengthSeconds)
+        {
+            _games[gameId].GameTimer = new GameTimer(roundLengthSeconds);
         }
 
         public void Delete(string id)
@@ -47,49 +48,58 @@ namespace MITBeerGame.Api.Stores
             _games.Remove(id);
         }
 
-        public (Game game, bool gameAlreadyStarted) StartGame(string gameId, string playerId, int roundLengthSeconds)
+
+        public bool RoleFilled(string gameId, RoleType roleType)
         {
-            var game = _games[gameId];
+            return _games[gameId].Players.Any(p => p.RoleType == roleType);
+        }
 
-            var readyAndWaiting = ReadyAndWaiting(playerId);
-            var playerStateKnown = game.GameEvents.Any(ge => ge.Description == readyAndWaiting);
 
-            var addNewGameEvent = !playerStateKnown && game.GameEvents.Count() < (game.TeamIds.Count() * 4);
-            if (addNewGameEvent)
-            {
-                game.GameEvents.Add(new GameEvent(gameId, 0, readyAndWaiting));
-            }
+        public void CreatePlayer(Player player)
+        {
+            _games[player.GameId].Players.Add(player);
+        }
 
-            var allPlayersReady = game.GameEvents.Count() == (game.TeamIds.Count() * 4);
-            var gameAlreadyStarted = game.GameTimer != null;
-            if (allPlayersReady && !gameAlreadyStarted)
-            {
-                game.GameTimer = new GameTimer(roundLengthSeconds);
-            }
+        public Player ReadPlayer(string playerId)
+        {
+            return ReadByPlayerId(playerId)
+                .Players
+                .First(p => p.Id == playerId);
+        }
 
-            return (game, gameAlreadyStarted);
+        public void SetPlayerReady(string playerId)
+        {
+            ReadByPlayerId(playerId)
+                .Players.Single(p => p.Id == playerId)
+                .IsReady = true;
+        }
+
+        public void DeletePlayer(string playerId)
+        {
+            var game = ReadByPlayerId(playerId);
+                
+            var player = _games[game.Id].Players.First(x => x.Id == playerId);
+
+            _games[game.Id].Players.Remove(player);
         }
 
         public void AddEvent(GameEvent gameEvent)
         {
-            var gameEvents = _games[gameEvent.GameId].GameEvents;
+            var gameEvents = _games[gameEvent.GameId].Events;
 
             var existingEvent = gameEvents.SingleOrDefault(ge =>
-                ge.TeamId == gameEvent.TeamId &&
+                ge.Player != null &&
+                gameEvent.Player != null &&
+                ge.GameId == gameEvent.GameId &&
                 ge.Player.Id == gameEvent.Player.Id &&
-                ge.RoundNumber == gameEvent.RoundNumber);
+                ge.RoundNumber == gameEvent.RoundNumber);;
 
             if (existingEvent != null)
             {
                 gameEvents.Remove(existingEvent);
             }
 
-            _games[gameEvent.GameId].GameEvents.Add(gameEvent);
-        }
-
-        private static string ReadyAndWaiting(string playerId)
-        {
-            return $"{playerId} ready and waiting";
+            _games[gameEvent.GameId].Events.Add(gameEvent);
         }
     }
 }

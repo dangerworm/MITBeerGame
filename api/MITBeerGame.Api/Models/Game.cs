@@ -1,4 +1,5 @@
-﻿using MITBeerGame.Api.Services;
+﻿using MITBeerGame.Api.Enums;
+using MITBeerGame.Api.Services;
 
 namespace MITBeerGame.Api.Models
 {
@@ -9,18 +10,45 @@ namespace MITBeerGame.Api.Models
             Id = Guid.NewGuid().ToString()[..6];
             Name = name;
 
-            TeamIds = new List<string>();
-            GameEvents = new List<GameEvent>();
+            var market = new Player(Id, "Market", Enums.RoleType.Market);
+
+            Players = new List<Player>
+            {
+                market
+            };
+
+            Events = new List<GameEvent>
+            {
+                new GameEvent(Id, 0, Helpers.ReadyAndWaiting(market.Id))
+            };
+
+            InitialStock = 12;
+            
+            InitialInOut = 4;
+
+            DeliveryTimeWeeks = 2;
         }
 
         public string Id { get; }
 
         public string Name { get; }
 
-        public GameTimer? GameTimer { get; set;  }
+        public List<Player> Players { get; }
 
-        public List<string> TeamIds { get; }
+        public List<GameEvent> Events { get; }
 
-        public List<GameEvent> GameEvents { get; }
+        public int InitialStock { get; }
+
+        public int InitialInOut { get; }
+
+        public int DeliveryTimeWeeks { get; }
+
+        public bool IsStarted => GameTimer != null;
+
+        public int RoundNumber { get; }
+
+        public GameTimer? GameTimer { get; set; }
+
+        public IEnumerable<string> PlayerNames => Players.Select(x => x.PlayerName);
     }
 }

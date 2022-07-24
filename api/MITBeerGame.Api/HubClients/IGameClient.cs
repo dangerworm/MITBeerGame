@@ -1,10 +1,9 @@
 ﻿using MITBeerGame.Api.Models;
 
-namespace MITBeerGame.Api.Interfaces
+namespace MITBeerGame.Api.HubClients
 {
     public interface IGameSetupClient
     {
         Task UpdateGames(IEnumerable<Game> games);
-        Task UpdateTeams(IEnumerable<Team> teams);
     }
 }

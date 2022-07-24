@@ -1,11 +1,11 @@
 ﻿using MITBeerGame.Api.Models;
 
-namespace MITBeerGame.Api.Interfaces
+namespace MITBeerGame.Api.HubClients
 {
     public interface IGameplayClient
     {
         Task StartGame(string gameId);
         Task UpdateRoundNumber(int roundNumber);
-        Task UpdateEvents(IEnumerable<GameEvent> gameEvents);
+        Task UpdateHistory(IEnumerable<PlayerState> history);
     }
 }

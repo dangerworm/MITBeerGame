@@ -1,4 +1,5 @@
-﻿using MITBeerGame.Api.Models;
+﻿using MITBeerGame.Api.Enums;
+using MITBeerGame.Api.Models;
 
 namespace MITBeerGame.Api.Interfaces
 {
@@ -7,10 +8,17 @@ namespace MITBeerGame.Api.Interfaces
         Game Create(string gameName);
         IEnumerable<Game> ReadAll();
         Game Read(string id);
+        public Game ReadByPlayerId(string playerId);
+        void StartGame(string gameId, int roundLengthSeconds);
         void Delete(string id);
-        
-        void AddTeam(string gameId, string teamId);
-        (Game game, bool gameAlreadyStarted) StartGame(string gameId, string playerId, int roundLengthSeconds);
+
+        bool RoleFilled(string gameId, RoleType roleType);
+
+        void CreatePlayer(Player player);
+        Player ReadPlayer(string playerId);
+        void SetPlayerReady(string playerId);
+        void DeletePlayer(string playerId);
+
         void AddEvent(GameEvent gameEvent);
     }
 }

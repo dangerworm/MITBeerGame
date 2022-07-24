@@ -66,7 +66,7 @@ const Games = (props) => {
           <h3 style={{ marginBottom: "4pt" }}>Current Games</h3>
           <ul>
             {games.map(g =>
-              <Link key={`link-${g.id}`} to={`/Teams/${g.id}`}>
+              <Link key={`link-${g.id}`} to={`/Players/${g.id}`}>
                 <li key={g.id}>{g.name}</li>
               </Link>
             )}

@@ -13,9 +13,8 @@ export const UpdateTeams = 'UpdateTeams';
 
 export const StartGame = 'StartGame';
 export const RoundLengthSeconds = 30;
-export const UpdateGameStates = 'UpdateGameStates';
 export const UpdateRoundNumber = 'UpdateRoundNumber';
-export const UpdateEvents = 'UpdateEvents';
+export const UpdateHistory = 'UpdateHistory';
 
 export const GetHeaders = {
   method: 'GET',

@@ -1,6 +1,7 @@
 using MITBeerGame.Api;
 using MITBeerGame.Api.Hubs;
 using MITBeerGame.Api.Interfaces;
+using MITBeerGame.Api.Services;
 using MITBeerGame.Api.Stores;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,7 +24,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IGameStore, GameStore>();
-builder.Services.AddSingleton<ITeamStore, TeamStore>();
+builder.Services.AddSingleton<IGameService, GameService>();
+builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
 var app = builder.Build();
 

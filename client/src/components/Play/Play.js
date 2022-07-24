@@ -2,20 +2,18 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { HostName, PostHeaders } from '../../Constants'
-import { HalfWidth } from '../../Styles'
 import { useGameSetupDataContext } from '../Contexts/GameSetupDataContext';
 import { useGameplayDataContext } from '../Contexts/GameplayDataContext';
 
 import AppPage from '../AppPage/AppPage';
 import { Status } from './Status';
 
-const getRoundNumberEndpoint = 'Gameplay/GetRoundNumber';
-const getEventsEndpoint = 'Gameplay/GetEvents';
+const createOrderEndpoint = 'Gameplay/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
-  const { getPlayerById } = useGameSetupDataContext();
-  const { startGame, events } = useGameplayDataContext();
+  const { games, getPlayerById } = useGameSetupDataContext();
+  const { startGame, getHistory, events } = useGameplayDataContext();
 
   useEffect(() => {
     startGame(gameId, playerId);
@@ -27,7 +25,9 @@ export const PlayView = (props) => {
         gameId={gameId}
         teamId={teamId}
         playerId={playerId}
+        games={games}
         getPlayerById={getPlayerById}
+        getHistory={getHistory}
         events={events}
       />
     </AppPage >
@@ -35,7 +35,7 @@ export const PlayView = (props) => {
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, getPlayerById, events } = props;
+  const { gameId, teamId, playerId, games, getPlayerById, getHistory, events } = props;
 
   const [lastEvent, setLastEvent] = useState(undefined);
   const [orderAmount, setOrderAmount] = useState(0);
@@ -46,36 +46,43 @@ export const Play = (props) => {
     getPlayerById(playerId)
     , [playerId, getPlayerById]);
 
+  useEffect(() => {
+    getHistory(gameId, playerId);
+  }, [getHistory, gameId, playerId]);
+
   const roundNumber = useMemo(() => {
-    if (!events) {
+    if (!events || events.length === 0) {
       return 0;
     }
+
     const roundNumbers = events.map(e => e.roundNumber);
     return Math.max(...roundNumbers);
   }, [events]);
 
   const createOrder = useCallback(() => {
-    fetch(HostName + getEventsEndpoint, {
+    fetch(HostName + createOrderEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ gameId, teamId, playerId, orderAmount: parseInt(orderAmount) })
     });
   }, [gameId, teamId, playerId, orderAmount]);
 
   useEffect(() => {
-    if (!events || events.length === 0) {
-      return;
+    var thisGame = games.filter(g => g.id === gameId);
+    
+    if (thisGame && thisGame.length === 1){
+      setWaitingForPlayers(!thisGame[0].isStarted);
     }
+  }, [games, gameId, setWaitingForPlayers])
 
-    if (events.every(e => e.description && e.description.includes('waiting'))) {
-      setWaitingForPlayers(true);
+  useEffect(() => {
+    if (!events || events.length === 0) {
       return;
     }
 
     const newGameEvents = events
       .filter(e =>
         !(e.description && !e.description.includes('waiting')) &&
-        !!e.teamId && e.teamId === teamId &&
-        !!e.player && e.player.id === playerId
+        !!e.teamId && e.teamId === teamId
       );
 
     newGameEvents.sort((a, b) => a.dateTime < b.dateTime ? -1 : 1);
@@ -112,7 +119,7 @@ export const Play = (props) => {
 
   return (
     <div>
-      <Link to={`/Players/${gameId}/${teamId}`}>
+      <Link to={`/Players/${gameId}`}>
         <h4>&laquo; Back to Players</h4>
       </Link>
 

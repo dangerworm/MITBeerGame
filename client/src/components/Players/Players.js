@@ -7,34 +7,35 @@ import { useGameSetupDataContext } from '../Contexts/GameSetupDataContext';
 
 import AppPage from '../AppPage/AppPage';
 
+const numberOfRoles = 5;
+
 const createPlayerEndpoint = 'GameSetup/CreatePlayer';
 const deletePlayerEndpoint = 'GameSetup/DeletePlayer';
 const startGameEndpoint = 'Gameplay/StartGame';
 
 export const PlayersView = (props) => {
-  const { gameId, teamId } = useParams();
-  const { getTeamById } = useGameSetupDataContext();
+  const { gameId } = useParams();
+  const { getGameById } = useGameSetupDataContext();
 
   return (
     <AppPage>
       <Players
         gameId={gameId}
-        teamId={teamId}
-        getTeamById={getTeamById}
+        getGameById={getGameById}
       />
     </AppPage>
   );
 }
 
 export const Players = (props) => {
-  const { gameId, teamId, getTeamById } = props;
+  const { gameId, getGameById } = props;
 
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
 
   const team = useMemo(() => {
-    return getTeamById(teamId)
-  }, [teamId, getTeamById]);
+    return getGameById(gameId)
+  }, [gameId, getGameById]);
 
   const onNameUpdate = (event) => {
     setName(event.target.value);
@@ -47,14 +48,14 @@ export const Players = (props) => {
   const createPlayer = async () => {
     await fetch(HostName + createPlayerEndpoint, {
       ...PostHeaders,
-      body: JSON.stringify({ teamId: team.id, playerName: name, playerRole: role })
+      body: JSON.stringify({ gameId, playerName: name, playerRole: role })
     });
   }
 
   const deletePlayer = async (playerId) => {
     await fetch(HostName + deletePlayerEndpoint, {
       ...PostHeaders,
-      body: JSON.stringify({ teamId, playerId })
+      body: JSON.stringify({ gameId, playerId })
     });
   }
 
@@ -132,14 +133,14 @@ export const Players = (props) => {
           <ul>
             {team.players.map(p =>
               <li key={p.id}>
-                {!!team && team.players.length === 4 &&
+                {!!team && team.players.length === numberOfRoles &&
                   <span>
-                    <Link key={`link-${p.id}`} to={`/Play/${gameId}/${teamId}/${p.id}`}>
+                    <Link key={`link-${p.id}`} to={`/Play/${gameId}/${p.id}`}>
                       {p.playerName} is the {p.role}
                     </Link>
                   </span>
                 }
-                {(!team || team.players.length < 4) &&
+                {(!team || team.players.length < numberOfRoles) &&
                   <span>
                     {p.playerName} is the {p.role}
                   </span>
@@ -149,7 +150,7 @@ export const Players = (props) => {
               </li>
             )}
           </ul>
-          {!!team && team.players.length === 4 &&
+          {!!team && team.players.length === numberOfRoles &&
             <div>
               <br />
               <h3 style={{ color: "green" }} onClick={startGame}>Let's play!</h3>

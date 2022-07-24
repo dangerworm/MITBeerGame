@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using MITBeerGame.Api.Interfaces;
+using MITBeerGame.Api.HubClients;
 
 namespace MITBeerGame.Api.Hubs
 {

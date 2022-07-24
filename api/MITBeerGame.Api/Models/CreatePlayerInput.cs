@@ -2,8 +2,8 @@
 {
     public class CreatePlayerInput
     {
+        public string GameId{ get; set; }
         public string PlayerName { get; set; }
         public string PlayerRole { get; set; }
-        public string TeamId { get; set; }
     }
 }

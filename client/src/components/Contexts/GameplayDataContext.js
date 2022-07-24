@@ -1,7 +1,9 @@
 import { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
-import { HostName, StartGame, RoundLengthSeconds, UpdateGameStates, UpdateRoundNumber, UpdateEvents } from '../../Constants'
+import { HostName, StartGame, RoundLengthSeconds, UpdateRoundNumber, UpdateHistory, PostHeaders } from '../../Constants'
+
+const getHistoryEndpoint = 'Gameplay/GetHistory';
 
 export const GameplayDataContext = createContext(undefined);
 
@@ -9,7 +11,6 @@ export const GameplayDataContextProvider = (props) => {
   const { children } = props;
 
   const [connection, setConnection] = useState(undefined);
-  const [gameStates, setGameStates] = useState(undefined);
   const [roundNumber, setRoundNumber] = useState(undefined);
   const [events, setEvents] = useState(undefined);
 
@@ -28,15 +29,15 @@ export const GameplayDataContextProvider = (props) => {
         .then(_ => {
           console.log("Connected!");
 
-          connection.on(UpdateGameStates, data => {
-            setGameStates(data);
-          })
-
           connection.on(UpdateRoundNumber, data => {
             setRoundNumber(data);
           })
 
-          connection.on(UpdateEvents, data => {
+          connection.on(UpdateHistory, data => {
+            setEvents(data);
+          })
+
+          connection.on(StartGame, data => {
             setEvents(data);
           })
         })
@@ -46,25 +47,33 @@ export const GameplayDataContextProvider = (props) => {
     }
   }, [connection]);
 
-
-  useEffect(() => {
-    createConnection(HostName);
-  }, []);
-
   const startGame = useCallback((gameId, playerId) => {
     if (!connection || connection.state !== HubConnectionState.Connected) {
       return;
     }
 
-    connection.invoke(StartGame, gameId, playerId, RoundLengthSeconds)
-      .then(data => setGameStates(data));
+    connection.invoke(StartGame, gameId, playerId, RoundLengthSeconds);
   }, [connection])
+
+  const getHistory = (gameId, playerId) => {
+    fetch(HostName + getHistoryEndpoint, {
+      ...PostHeaders,
+      body: JSON.stringify({ gameId, playerId })
+    })
+      .then(response => response
+        .json()
+        .then(data => setEvents(data)));
+  };
+
+  useEffect(() => {
+    createConnection(HostName);
+  }, []);
 
   return (
     <GameplayDataContext.Provider
       value={{
         startGame,
-        gameStates,
+        getHistory,
         roundNumber,
         events
       }}
