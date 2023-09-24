@@ -55,7 +55,7 @@ export const GameplayDataContextProvider = (props) => {
     connection.invoke(StartGame, gameId, playerId, RoundLengthSeconds);
   }, [connection])
 
-  const getHistory = (gameId, playerId) => {
+  const getHistory = useCallback((gameId, playerId) => {
     fetch(HostName + getHistoryEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ gameId, playerId })
@@ -63,7 +63,7 @@ export const GameplayDataContextProvider = (props) => {
       .then(response => response
         .json()
         .then(data => setEvents(data)));
-  };
+  }, [connection]);
 
   useEffect(() => {
     createConnection(HostName);

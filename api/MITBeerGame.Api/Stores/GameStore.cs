@@ -48,12 +48,10 @@ namespace MITBeerGame.Api.Stores
             _games.Remove(id);
         }
 
-
         public bool RoleFilled(string gameId, RoleType roleType)
         {
             return _games[gameId].Players.Any(p => p.RoleType == roleType);
         }
-
 
         public void CreatePlayer(Player player)
         {

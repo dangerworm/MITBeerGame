@@ -98,8 +98,8 @@ export const Players = (props) => {
       {!!team &&
         <h2>{team.name}</h2>
       }
-      <Link to={`/Teams/${gameId}`}>
-        <h4>&laquo; Back to Teams</h4>
+      <Link to={`/`}>
+        <h4>&laquo; Back to Games</h4>
       </Link>
       <div style={HalfWidth}>
         <h3 style={{ marginBottom: "4pt" }}>New Player</h3>
@@ -131,29 +131,30 @@ export const Players = (props) => {
         <div style={HalfWidth}>
           <h3 style={{ marginBottom: "4pt" }}>Current Players</h3>
           <ul>
-            {team.players.map(p =>
-              <li key={p.id}>
-                {!!team && team.players.length === numberOfRoles &&
-                  <span>
-                    <Link key={`link-${p.id}`} to={`/Play/${gameId}/${p.id}`}>
+            {team.players
+              .map(p =>
+                <li key={p.id}>
+                  {!!team && team.players.length === numberOfRoles &&
+                    <span>
+                      <Link key={`link-${p.id}`} to={`/Play/${gameId}/${p.id}`}>
+                        {p.playerName} is the {p.role}
+                      </Link>
+                    </span>
+                  }
+                  {(!team || team.players.length < numberOfRoles) &&
+                    <span>
                       {p.playerName} is the {p.role}
-                    </Link>
-                  </span>
-                }
-                {(!team || team.players.length < numberOfRoles) &&
-                  <span>
-                    {p.playerName} is the {p.role}
-                  </span>
-                }
+                    </span>
+                  }
 
-                <span onClick={e => onRemovePlayer(e, p.id)}>&nbsp; [x]</span>
-              </li>
-            )}
+                  <span onClick={e => onRemovePlayer(e, p.id)}>&nbsp; [x]</span>
+                </li>
+              )}
           </ul>
           {!!team && team.players.length === numberOfRoles &&
             <div>
               <br />
-              <h3 style={{ color: "green" }} onClick={startGame}>Let's play!</h3>
+              <input type="button" onClick={startGame} value="Let's play!" />
             </div>
           }
         </div>
@@ -164,18 +165,18 @@ export const Players = (props) => {
 
 export const RoleInput = (props) => {
   const { roleType, selectedRole, players, onRoleUpdate } = props;
-  
-  if (!players){
+
+  if (!players) {
     return;
   }
-  
-  const id = `role-${roleType}`; 
+
+  const id = `role-${roleType}`;
   const roleTaken = players.some(p => p.role === roleType);
   const selected = selectedRole === roleType && !roleTaken;
 
   return (
     <>
-      <input 
+      <input
         id={id}
         name="role"
         type="radio"
@@ -183,7 +184,7 @@ export const RoleInput = (props) => {
         checked={selected}
         value={selected}
         disabled={roleTaken}
-        onChange={_ => onRoleUpdate(roleType)} 
+        onChange={_ => onRoleUpdate(roleType)}
       />
       <label htmlFor={id}>{roleType}</label>
     </>

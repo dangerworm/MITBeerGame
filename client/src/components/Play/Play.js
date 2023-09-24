@@ -8,11 +8,13 @@ import { useGameplayDataContext } from '../Contexts/GameplayDataContext';
 import AppPage from '../AppPage/AppPage';
 import { Status } from './Status';
 
+import { convertRoleIdToString } from '../Helpers/Helpers';
+
 const createOrderEndpoint = 'Gameplay/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
-  const { games, getPlayerById } = useGameSetupDataContext();
+  const { games, getGameById, getPlayerById } = useGameSetupDataContext();
   const { startGame, getHistory, events } = useGameplayDataContext();
 
   useEffect(() => {
@@ -26,6 +28,7 @@ export const PlayView = (props) => {
         teamId={teamId}
         playerId={playerId}
         games={games}
+        getGameById={getGameById}
         getPlayerById={getPlayerById}
         getHistory={getHistory}
         events={events}
@@ -35,12 +38,16 @@ export const PlayView = (props) => {
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, games, getPlayerById, getHistory, events } = props;
+  const { gameId, teamId, playerId, games, getGameById, getPlayerById, getHistory, events } = props;
 
   const [lastEvent, setLastEvent] = useState(undefined);
   const [orderAmount, setOrderAmount] = useState(0);
   const [waitingForPlayers, setWaitingForPlayers] = useState(undefined);
   const [gameEvents, setGameEvents] = useState(undefined);
+
+  const game = useMemo(() =>
+    getGameById(gameId)
+    , [gameId, getGameById])
 
   const player = useMemo(() =>
     getPlayerById(playerId)
@@ -68,8 +75,8 @@ export const Play = (props) => {
 
   useEffect(() => {
     var thisGame = games.filter(g => g.id === gameId);
-    
-    if (thisGame && thisGame.length === 1){
+
+    if (thisGame && thisGame.length === 1) {
       setWaitingForPlayers(!thisGame[0].isStarted);
     }
   }, [games, gameId, setWaitingForPlayers])
@@ -131,8 +138,9 @@ export const Play = (props) => {
       {!waitingForPlayers &&
         <>
           <div>
-            <h3>Round {roundNumber}</h3>
+            <h3>{game.name} | {player.playerName} ({convertRoleIdToString(player.roleType)}) | Round {roundNumber}</h3>
             <Status events={gameEvents} />
+            <br />
             <form onSubmit={onSubmitOrder}>
               <label htmlFor="order">Next Order:</label>
               <br />

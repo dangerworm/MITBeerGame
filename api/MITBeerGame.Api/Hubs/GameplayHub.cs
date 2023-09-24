@@ -30,7 +30,7 @@ namespace MITBeerGame.Api.Hubs
                 await _gameplayHub.Clients.All.StartGame(gameId);
             }
 
-            var games = _gameService.ReadAll();
+            var games = _gameService.ReadAll().ToList();
             await _gameSetupHub.Clients.All.UpdateGames(games);
             await _gameplayHub.Clients.All.UpdateHistory(games.SelectMany(g => g.Players.SelectMany(p => p.History)));
         }

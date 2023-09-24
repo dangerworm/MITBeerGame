@@ -15,11 +15,23 @@ export const Status = (props) => {
   }, [events]);
 
   return (
-    <div>
-      <p><strong>Required:</strong> {required}</p>
-      <p><strong>Just Dispatched:</strong> {justDispatched}</p>
-      <p><strong>Stock Level:</strong> {stockLevel}</p>
-      <p><strong>Just Delivered:</strong> {justDelivered}</p>
-    </div >
+    <table width="100%" border="1px solid black" >
+      <thead>
+        <tr>
+          <th>Required</th>
+          <th>Just Dispatched</th>
+          <th>Stock Level</th>
+          <th>Just Delivered</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style={{ textAlign: "center" }}>{required}</td>
+          <td style={{ textAlign: "center" }}>{justDispatched}</td>
+          <td style={{ textAlign: "center" }}>{stockLevel}</td>
+          <td style={{ textAlign: "center" }}>{justDelivered}</td>
+        </tr>
+      </tbody>
+    </table>
   );
 }
