@@ -48,7 +48,7 @@ namespace MITBeerGame.Api.Controllers
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerInput input)
         {
             var team = _gameService .Read(input.GameId);
-            var roleType = Helpers.GetRoleType(input.PlayerRole);
+            var roleType = input.PlayerRole.GetRoleType();
             if (_gameService.IsRoleFilled(input.GameId, roleType))
             {
                 return new JsonResult(new { Error = $"There is already a player in that role for {team.Name}" });

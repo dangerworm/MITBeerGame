@@ -11,7 +11,6 @@ const numberOfRoles = 5;
 
 const createPlayerEndpoint = 'GameSetup/CreatePlayer';
 const deletePlayerEndpoint = 'GameSetup/DeletePlayer';
-const startGameEndpoint = 'Gameplay/StartGame';
 
 export const PlayersView = (props) => {
   const { gameId } = useParams();
@@ -56,13 +55,6 @@ export const Players = (props) => {
     await fetch(HostName + deletePlayerEndpoint, {
       ...PostHeaders,
       body: JSON.stringify({ gameId, playerId })
-    });
-  }
-
-  const startGame = async () => {
-    await fetch(HostName + startGameEndpoint, {
-      ...PostHeaders,
-      body: JSON.stringify({ gameId })
     });
   }
 
@@ -154,7 +146,7 @@ export const Players = (props) => {
           {!!team && team.players.length === numberOfRoles &&
             <div>
               <br />
-              <input type="button" onClick={startGame} value="Let's play!" />
+              <h3 style={{ color: "green" }}>Let's play!</h3>
             </div>
           }
         </div>

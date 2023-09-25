@@ -27,6 +27,8 @@ builder.Services.AddSingleton<IGameStore, GameStore>();
 builder.Services.AddSingleton<IGameService, GameService>();
 builder.Services.AddSingleton<IPlayerService, PlayerService>();
 
+builder.Services.AddHostedService<GameTimeWorker>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

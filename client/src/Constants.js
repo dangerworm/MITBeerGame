@@ -11,23 +11,23 @@ export const SendMessage = 'SendMessage';
 export const UpdateGames = 'UpdateGames';
 export const UpdateTeams = 'UpdateTeams';
 
-export const StartGame = 'StartGame';
 export const RoundLengthSeconds = 30;
-export const UpdateRoundNumber = 'UpdateRoundNumber';
+export const StartGame = 'StartGame';
+export const UpdateGameTimes = 'UpdateGameTimes';
 export const UpdateHistory = 'UpdateHistory';
+export const UpdateRoundNumber = 'UpdateRoundNumber';
+
+const headers = {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json'
+};
 
 export const GetHeaders = {
   method: 'GET',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
+  headers: headers
 };
 
 export const PostHeaders = {
   method: 'POST',
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-  }
+  headers: headers
 };

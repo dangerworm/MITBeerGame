@@ -15,7 +15,7 @@ const createOrderEndpoint = 'Gameplay/CreateOrder';
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
   const { games, getGameById, getPlayerById } = useGameSetupDataContext();
-  const { startGame, getHistory, events } = useGameplayDataContext();
+  const { startGame, gameTimes, events } = useGameplayDataContext();
 
   useEffect(() => {
     startGame(gameId, playerId);
@@ -29,8 +29,8 @@ export const PlayView = (props) => {
         playerId={playerId}
         games={games}
         getGameById={getGameById}
+        gameTimes={gameTimes}
         getPlayerById={getPlayerById}
-        getHistory={getHistory}
         events={events}
       />
     </AppPage >
@@ -38,12 +38,14 @@ export const PlayView = (props) => {
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, games, getGameById, getPlayerById, getHistory, events } = props;
+  const { gameId, teamId, playerId, games, getGameById, gameTimes, getPlayerById, events } = props;
 
   const [lastEvent, setLastEvent] = useState(undefined);
   const [orderAmount, setOrderAmount] = useState(0);
   const [waitingForPlayers, setWaitingForPlayers] = useState(undefined);
   const [gameEvents, setGameEvents] = useState(undefined);
+  const [roundNumber, setRoundNumber] = useState(undefined);
+  const [timeRemaining, setTimeRemaining] = useState(undefined);
 
   const game = useMemo(() =>
     getGameById(gameId)
@@ -52,19 +54,6 @@ export const Play = (props) => {
   const player = useMemo(() =>
     getPlayerById(playerId)
     , [playerId, getPlayerById]);
-
-  useEffect(() => {
-    getHistory(gameId, playerId);
-  }, [getHistory, gameId, playerId]);
-
-  const roundNumber = useMemo(() => {
-    if (!events || events.length === 0) {
-      return 0;
-    }
-
-    const roundNumbers = events.map(e => e.roundNumber);
-    return Math.max(...roundNumbers);
-  }, [events]);
 
   const createOrder = useCallback(() => {
     fetch(HostName + createOrderEndpoint, {
@@ -79,6 +68,7 @@ export const Play = (props) => {
     if (thisGame && thisGame.length === 1) {
       setWaitingForPlayers(!thisGame[0].isStarted);
     }
+
   }, [games, gameId, setWaitingForPlayers])
 
   useEffect(() => {
@@ -87,12 +77,9 @@ export const Play = (props) => {
     }
 
     const newGameEvents = events
-      .filter(e =>
-        !(e.description && !e.description.includes('waiting')) &&
-        !!e.teamId && e.teamId === teamId
-      );
+      .filter(e => e.gameId === game.id && e.roleType === player.roleType);
 
-    newGameEvents.sort((a, b) => a.dateTime < b.dateTime ? -1 : 1);
+    newGameEvents.sort((a, b) => a.roundNumber < b.roundNumber ? -1 : 1);
 
     setGameEvents(newGameEvents);
 
@@ -123,6 +110,24 @@ export const Play = (props) => {
       alert('Please order a positive whole number of units');
     }
   }
+  
+  const gameTime = useEffect(() => {
+    const interval = setInterval(() => {
+      if (!gameTimes || gameTimes.length === 0) {
+        return;
+      }
+
+      const time = gameTimes.filter(gt => gt.gameId === gameId);
+      if (!time || time.length !== 1) {
+        return;
+      }
+
+      setRoundNumber(time[0].roundNumber)
+      setTimeRemaining(time[0].timeRemainingString);
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, [gameTimes, gameId, setTimeRemaining]);
 
   return (
     <div>
@@ -138,8 +143,17 @@ export const Play = (props) => {
       {!waitingForPlayers &&
         <>
           <div>
-            <h3>{game.name} | {player.playerName} ({convertRoleIdToString(player.roleType)}) | Round {roundNumber}</h3>
-            <Status events={gameEvents} />
+            {game && player && (
+              <h3>
+                {game.name} |
+                &nbsp;{player.playerName} ({convertRoleIdToString(player.roleType)}) |
+                &nbsp;Round {roundNumber}
+                {timeRemaining && ` | ${timeRemaining} remaining`}
+              </h3>
+            )}
+            {gameEvents && gameEvents.length > 0 && (
+              <Status event={gameEvents[gameEvents.length - 1]} />
+            )}
             <br />
             <form onSubmit={onSubmitOrder}>
               <label htmlFor="order">Next Order:</label>
@@ -158,14 +172,14 @@ export const Play = (props) => {
             <h3 style={{ marginBottom: "4pt" }}>Event History</h3>
             {!!gameEvents && gameEvents.map((event, index) =>
               <div key={event.id}>
-                <p><b>Event {gameEvents.length - index}</b></p>
+                <p><b>Round {index + 1}</b></p>
                 {!!event.description && event.orderAmount === 0 ?
                   (
                     <span key={event.id}>
                       <em>{event.description}</em>
                     </span>
                   ) :
-                  <Status key={event.id} events={gameEvents.slice(0, index + 1)} />
+                  <Status event={event} />
                 }
               </div>
             )}

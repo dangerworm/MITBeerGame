@@ -1,35 +1,33 @@
 import React, { useEffect, useState } from 'react';
 
 export const Status = (props) => {
-  const { playerRole, events } = props;
-
-  const [required, setRequired] = useState(0);
-  const [justDispatched, setJustDispatched] = useState(0);
-  const [stockLevel, setStockLevel] = useState(0);
-  const [justDelivered, setJustDelivered] = useState(0);
+  const { event } = props;
+  const { onBackOrder, ordered, stockLevel, totalIn, totalOut } = event;
 
   useEffect(() => {
-    if (!events || events.length === 0) {
+    if (!event) {
       return;
     }
-  }, [events]);
+  }, [event]);
 
   return (
     <table width="100%" border="1px solid black" >
       <thead>
         <tr>
-          <th>Required</th>
-          <th>Just Dispatched</th>
+          <th>Received</th>
+          <th>Dispatched</th>
+          <th>Back Orders</th>
           <th>Stock Level</th>
-          <th>Just Delivered</th>
+          <th>Ordered</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style={{ textAlign: "center" }}>{required}</td>
-          <td style={{ textAlign: "center" }}>{justDispatched}</td>
+          <td style={{ textAlign: "center" }}>{totalIn}</td>
+          <td style={{ textAlign: "center" }}>{totalOut}</td>
+          <td style={{ textAlign: "center" }}>{onBackOrder}</td>
           <td style={{ textAlign: "center" }}>{stockLevel}</td>
-          <td style={{ textAlign: "center" }}>{justDelivered}</td>
+          <td style={{ textAlign: "center" }}>{ordered}</td>
         </tr>
       </tbody>
     </table>

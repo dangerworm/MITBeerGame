@@ -40,28 +40,13 @@ namespace MITBeerGame.Api.Controllers
         [HttpPost("CreateOrder")]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderInput input)
         {
-            // TODO: Validate that the order is expected at this time and
-            // won't cause two orders to be created in the same round
-
             var gameEvent = _playerService.SetPlayerOrderAmount(input.PlayerId, input.OrderAmount);
 
-            var games = _gameService.ReadAll();
+            var games = _gameService.ReadAll().ToList();
             await _gameSetupHub.Clients.All.UpdateGames(games);
             await _gameplayHub.Clients.All.UpdateHistory(games.SelectMany(g => g.Players.SelectMany(p => p.History)));
 
             return new JsonResult(gameEvent);
-        }
-
-        [HttpPost("GetHistory")]
-        public async Task<IActionResult> GetHistory([FromBody] GetHistoryInput input)
-        {
-            var history = _gameService
-                .Read(input.GameId)
-                .Players
-                .Single(p => p.Id == input.PlayerId)
-                .History;
-
-            return new JsonResult(history);
         }
 
         private int GetRoundNumber(string gameId)

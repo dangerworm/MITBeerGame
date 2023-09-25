@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using MITBeerGame.Api.HubClients;
 using MITBeerGame.Api.Interfaces;
+using MITBeerGame.Api.Models;
 
 namespace MITBeerGame.Api.Hubs
 {
@@ -27,6 +28,7 @@ namespace MITBeerGame.Api.Hubs
 
             if (beginGame)
             {
+                game.StartNextRound();
                 await _gameplayHub.Clients.All.StartGame(gameId);
             }
 
