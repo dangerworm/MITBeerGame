@@ -17,12 +17,13 @@
         {
             var duration = DateTime.UtcNow - _startTime;
 
-            return (int)Math.Floor(duration / _roundLength);
+            var roundNumber = (int)Math.Floor(duration / _roundLength); 
+            return roundNumber + 1;
         }
 
         public TimeSpan GetTimeRemaining()
         {
-            var roundEnd = _startTime + ((GetRoundNumber() + 1) * _roundLength);
+            var roundEnd = _startTime + (GetRoundNumber() * _roundLength);
 
             return roundEnd - DateTime.UtcNow;
         }

@@ -14,8 +14,7 @@ const createOrderEndpoint = 'Gameplay/CreateOrder';
 
 export const PlayView = (props) => {
   const { gameId, teamId, playerId } = useParams();
-  const { games, getGameById, getPlayerById } = useGameSetupDataContext();
-  const { startGame, gameTimes, events } = useGameplayDataContext();
+  const { startGame } = useGameplayDataContext();
 
   useEffect(() => {
     startGame(gameId, playerId);
@@ -27,18 +26,16 @@ export const PlayView = (props) => {
         gameId={gameId}
         teamId={teamId}
         playerId={playerId}
-        games={games}
-        getGameById={getGameById}
-        gameTimes={gameTimes}
-        getPlayerById={getPlayerById}
-        events={events}
       />
     </AppPage >
   );
 }
 
 export const Play = (props) => {
-  const { gameId, teamId, playerId, games, getGameById, gameTimes, getPlayerById, events } = props;
+  const { gameId, teamId, playerId } = props;
+
+  const { games, getGameById, getPlayerById } = useGameSetupDataContext();
+  const { gameTimes, events } = useGameplayDataContext();
 
   const [lastEvent, setLastEvent] = useState(undefined);
   const [orderAmount, setOrderAmount] = useState(0);
@@ -71,13 +68,14 @@ export const Play = (props) => {
 
   }, [games, gameId, setWaitingForPlayers])
 
-  useEffect(() => {
+  const refreshEvents = useCallback(() => {
     if (!events || events.length === 0) {
       return;
     }
 
     const newGameEvents = events
-      .filter(e => e.gameId === game.id && e.roleType === player.roleType);
+      .filter(e => e.gameId === game.id &&
+        e.roleType === player.roleType);
 
     newGameEvents.sort((a, b) => a.roundNumber < b.roundNumber ? -1 : 1);
 
@@ -89,8 +87,11 @@ export const Play = (props) => {
     }
 
     setLastEvent(newLastEvent);
-    createOrder();
-  }, [events, playerId, teamId, lastEvent, setLastEvent, createOrder]);
+  }, [events, setGameEvents, lastEvent, setLastEvent])
+
+  useEffect(() => {
+    refreshEvents();
+  }, [refreshEvents]);
 
   const onOrderUpdate = (event) => {
     setOrderAmount(event.target.value);
@@ -110,8 +111,8 @@ export const Play = (props) => {
       alert('Please order a positive whole number of units');
     }
   }
-  
-  const gameTime = useEffect(() => {
+
+  useEffect(() => {
     const interval = setInterval(() => {
       if (!gameTimes || gameTimes.length === 0) {
         return;
@@ -125,7 +126,7 @@ export const Play = (props) => {
       setRoundNumber(time[0].roundNumber)
       setTimeRemaining(time[0].timeRemainingString);
     }, 500);
-    
+
     return () => clearInterval(interval);
   }, [gameTimes, gameId, setTimeRemaining]);
 
@@ -137,6 +138,7 @@ export const Play = (props) => {
 
       {waitingForPlayers &&
         <div>
+          <h2>{game.name}</h2>
           <h3 style={{ color: "green" }}>Waiting for players...</h3>
         </div>
       }
@@ -170,18 +172,20 @@ export const Play = (props) => {
 
           <div>
             <h3 style={{ marginBottom: "4pt" }}>Event History</h3>
-            {!!gameEvents && gameEvents.map((event, index) =>
-              <div key={event.id}>
-                <p><b>Round {index + 1}</b></p>
-                {!!event.description && event.orderAmount === 0 ?
-                  (
-                    <span key={event.id}>
-                      <em>{event.description}</em>
-                    </span>
-                  ) :
-                  <Status event={event} />
-                }
-              </div>
+            {gameEvents && gameEvents.map((event, index) => 
+              event.roundNumber > 0 && (
+                <div key={event.id}>
+                  <p><b>Round {event.roundNumber}</b></p>
+                  {!!event.description && event.orderAmount === 0 ?
+                    (
+                      <span key={event.id}>
+                        <em>{event.description}</em>
+                      </span>
+                    ) :
+                    <Status event={event} />
+                  }
+                </div>
+              )
             )}
           </div>
         </>

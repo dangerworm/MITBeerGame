@@ -31,9 +31,9 @@ namespace MITBeerGame.Api
             };
         }
 
-        public static string ReadyAndWaiting(string playerId)
+        public static string ReadyAndWaiting(string playerRole)
         {
-            return $"{playerId} ready and waiting";
+            return $"{playerRole} ready and waiting";
         }
     }
 }

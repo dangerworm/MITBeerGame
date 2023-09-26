@@ -23,15 +23,11 @@ namespace MITBeerGame.Api.Services
             return _gameStore.ReadPlayer(playerId);
         }
 
-        public GameEvent SetPlayerOrderAmount(string playerId, int orderAmount)
+        public void SetPlayerOrderAmount(string playerId, int orderAmount)
         {
-            var game = _gameStore.ReadByPlayerId(playerId);
+            var game = _gameStore.ReadGameByPlayerId(playerId);
             var player = game.Players.First(p => p.Id == playerId);
-
-            var gameEvent = new GameEvent(game.Id, player, game.RoundNumber, orderAmount);
-            _gameStore.AddEvent(gameEvent);
-            
-            return gameEvent;
+            player.NextOrder = orderAmount;
         }
 
         public void Delete(string playerId)

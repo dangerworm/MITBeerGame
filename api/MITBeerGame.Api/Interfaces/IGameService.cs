@@ -8,10 +8,9 @@ namespace MITBeerGame.Api.Interfaces
         Game Create(string gameName);
         IEnumerable<Game> ReadAll();
         Game Read(string id);
+        IEnumerable<PlayerState> ReadPlayerHistories();
         void Delete(string id);
         bool IsRoleFilled(string gameId, RoleType roleType);
-        (Game game, bool beginGame) StartGame(string gameId, string playerId, int roundLengthSeconds);
-        void AddEvent(GameEvent gameEvent);
-        void StartNextRound(string gameId);
+        bool StartGame(string gameId, string playerId, int roundLengthSeconds);
     }
 }

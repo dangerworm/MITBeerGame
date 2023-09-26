@@ -12,6 +12,7 @@ namespace MITBeerGame.Api.Models
             RoleType = roleType;
             IsReady = false;
             History = new List<PlayerState>();
+            NextOrder = 0;
         }
 
         public string Id { get; }
@@ -24,7 +25,9 @@ namespace MITBeerGame.Api.Models
 
         public bool IsReady { get; set; }
 
-        public List<PlayerState> History { get; set; }
+        public List<PlayerState> History { get; }
+        
+        public int NextOrder { get; set;  }
 
         public string Role => RoleType.GetRole();
     }

@@ -32,7 +32,7 @@ export const Players = (props) => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
 
-  const team = useMemo(() => {
+  const game = useMemo(() => {
     return getGameById(gameId)
   }, [gameId, getGameById]);
 
@@ -72,7 +72,7 @@ export const Players = (props) => {
         });
     }
     else {
-      alert('Please type a name and team, and pick a role');
+      alert('Please type a team name, and pick a role');
     }
   }
 
@@ -81,18 +81,20 @@ export const Players = (props) => {
     deletePlayer(playerId);
   }
 
-  if (!team) {
+  if (!game) {
     return;
   }
 
   return (
     <div>
-      {!!team &&
-        <h2>{team.name}</h2>
-      }
       <Link to={`/`}>
         <h4>&laquo; Back to Games</h4>
       </Link>
+      
+      {!!game &&
+        <h2>{game.name}</h2>
+      }
+      
       <div style={HalfWidth}>
         <h3 style={{ marginBottom: "4pt" }}>New Player</h3>
         <form onSubmit={onAddPlayer}>
@@ -100,40 +102,37 @@ export const Players = (props) => {
           <br />
           <input id="name" name="name" value={name} onChange={onNameUpdate} />
           <br />
-          <label htmlFor="teamName">Team:</label>
-          <br />
-          <input readOnly id="teamName" name="teamName" value={team?.name} />
           <br />
           <label htmlFor="role">Role:</label>
           <br />
-          <RoleInput roleType={"Vendor"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
+          <RoleInput roleType={"Vendor"} selectedRole={role} players={game?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <RoleInput roleType={"Wholesaler"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
+          <RoleInput roleType={"Wholesaler"} selectedRole={role} players={game?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <RoleInput roleType={"Distributor"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
+          <RoleInput roleType={"Distributor"} selectedRole={role} players={game?.players} onRoleUpdate={onRoleUpdate} />
           <br />
-          <RoleInput roleType={"Brewer"} selectedRole={role} players={team?.players} onRoleUpdate={onRoleUpdate} />
+          <RoleInput roleType={"Brewer"} selectedRole={role} players={game?.players} onRoleUpdate={onRoleUpdate} />
           <br />
           <br />
           <button>Submit</button>
         </form>
       </div>
 
-      {!!team && team.players.length > 0 &&
+      {!!game && game.players.length > 0 &&
         <div style={HalfWidth}>
           <h3 style={{ marginBottom: "4pt" }}>Current Players</h3>
           <ul>
-            {team.players
+            {game.players
               .map(p =>
                 <li key={p.id}>
-                  {!!team && team.players.length === numberOfRoles &&
+                  {!!game && game.players.length === numberOfRoles &&
                     <span>
                       <Link key={`link-${p.id}`} to={`/Play/${gameId}/${p.id}`}>
                         {p.playerName} is the {p.role}
                       </Link>
                     </span>
                   }
-                  {(!team || team.players.length < numberOfRoles) &&
+                  {(!game || game.players.length < numberOfRoles) &&
                     <span>
                       {p.playerName} is the {p.role}
                     </span>
@@ -143,7 +142,7 @@ export const Players = (props) => {
                 </li>
               )}
           </ul>
-          {!!team && team.players.length === numberOfRoles &&
+          {!!game && game.players.length === numberOfRoles &&
             <div>
               <br />
               <h3 style={{ color: "green" }}>Let's play!</h3>

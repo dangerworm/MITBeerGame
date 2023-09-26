@@ -33,14 +33,15 @@ namespace MITBeerGame.Api.Stores
             return _games[id];
         }
 
-        public Game ReadByPlayerId(string playerId)
+        public Game ReadGameByPlayerId(string playerId)
         {
             return _games.Values.First(g => g.Players.Select(p => p.Id).Contains(playerId));
         }
 
         public void StartGame(string gameId, int roundLengthSeconds)
         {
-            _games[gameId].GameTimer = new GameTimer(roundLengthSeconds);
+            var game = _games[gameId];
+            game.GameTimer = new GameTimer(roundLengthSeconds);
         }
 
         public void Delete(string id)
@@ -60,21 +61,19 @@ namespace MITBeerGame.Api.Stores
 
         public Player ReadPlayer(string playerId)
         {
-            return ReadByPlayerId(playerId)
+            return ReadGameByPlayerId(playerId)
                 .Players
-                .First(p => p.Id == playerId);
+                .Single(p => p.Id == playerId);
         }
 
         public void SetPlayerReady(string playerId)
         {
-            ReadByPlayerId(playerId)
-                .Players.Single(p => p.Id == playerId)
-                .IsReady = true;
+            ReadPlayer(playerId).IsReady = true;
         }
 
         public void DeletePlayer(string playerId)
         {
-            var game = ReadByPlayerId(playerId);
+            var game = ReadGameByPlayerId(playerId);
                 
             var player = _games[game.Id].Players.First(x => x.Id == playerId);
 
@@ -90,7 +89,7 @@ namespace MITBeerGame.Api.Stores
                 gameEvent.Player != null &&
                 ge.GameId == gameEvent.GameId &&
                 ge.Player.Id == gameEvent.Player.Id &&
-                ge.RoundNumber == gameEvent.RoundNumber);;
+                ge.RoundNumber == gameEvent.RoundNumber);
 
             if (existingEvent != null)
             {

@@ -24,17 +24,15 @@ namespace MITBeerGame.Api.Hubs
 
         public async Task StartGame(string gameId, string playerId, int roundLengthSeconds = 30)
         {
-            var (game, beginGame) = _gameService.StartGame(gameId, playerId, roundLengthSeconds);
-
+            var beginGame = _gameService.StartGame(gameId, playerId, roundLengthSeconds);
             if (beginGame)
             {
-                game.StartNextRound();
                 await _gameplayHub.Clients.All.StartGame(gameId);
             }
 
             var games = _gameService.ReadAll().ToList();
             await _gameSetupHub.Clients.All.UpdateGames(games);
-            await _gameplayHub.Clients.All.UpdateHistory(games.SelectMany(g => g.Players.SelectMany(p => p.History)));
+            await _gameplayHub.Clients.All.UpdateHistory(_gameService.ReadPlayerHistories());
         }
     }
 }

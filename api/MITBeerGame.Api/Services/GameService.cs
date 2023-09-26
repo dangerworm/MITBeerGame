@@ -28,6 +28,14 @@ namespace MITBeerGame.Api.Services
             return _gameStore.Read(id);
         }
 
+        public IEnumerable<PlayerState> ReadPlayerHistories()
+        {
+            return _gameStore
+                .ReadAll()
+                .SelectMany(g => g.Players
+                    .SelectMany(p => p.History));
+        }
+
         public void Delete(string id)
         {
             _gameStore.Delete(id);
@@ -38,11 +46,14 @@ namespace MITBeerGame.Api.Services
             return Read(gameId).Players.Any(p => p.RoleType == roleType);
         }
 
-        public (Game game, bool beginGame) StartGame(string gameId, string playerId, int roundLengthSeconds)
+        public bool StartGame(string gameId, string playerId, int roundLengthSeconds)
         {
             var game = _gameStore.Read(gameId);
             var gameWasStarted = game.IsStarted;
+
+            var player = _gameStore.ReadPlayer(playerId);
             
+            game.InitialisePlayer(player.RoleType);
             _gameStore.SetPlayerReady(playerId);
 
             var allPlayersReady = game.Players.All(p => p.IsReady);
@@ -53,19 +64,7 @@ namespace MITBeerGame.Api.Services
                 _gameStore.StartGame(gameId, roundLengthSeconds);
             }
 
-            return (game, beginGame);
-        }
-
-        public void AddEvent(GameEvent gameEvent)
-        {
-            _gameStore.AddEvent(gameEvent);
-        }
-
-        public void StartNextRound(string gameId)
-        {
-            var game = _gameStore.Read(gameId);
-
-            game.StartNextRound();
+            return beginGame;
         }
     }
 }

@@ -2,20 +2,18 @@
 {
     public class GameEvent
     {
-        public GameEvent(string gameId, int roundNumber, string description)
+        public GameEvent(string gameId, int eventNumber, int roundNumber, string description)
         {
             Id = Guid.NewGuid().ToString();
             DateTime = DateTime.Now;
-
             GameId = gameId;
-
+            EventNumber = eventNumber;
             RoundNumber = roundNumber;
-
             Description = description;
         }
 
-        public GameEvent(string gameId, Player player, int roundNumber, int orderAmount, string description = "")
-            :this (gameId, roundNumber, description)
+        public GameEvent(string gameId, int eventNumber, Player player, int roundNumber, int orderAmount, string description = "")
+            :this (gameId, eventNumber, roundNumber, description)
         {
             Player = player;
 
@@ -25,6 +23,7 @@
         public string Id { get; }
         public DateTime DateTime { get; }
         public string GameId { get; }
+        public int EventNumber { get; }
         public Player? Player { get; }
 
         public int RoundNumber { get; }

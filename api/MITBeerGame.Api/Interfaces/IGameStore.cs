@@ -8,7 +8,7 @@ namespace MITBeerGame.Api.Interfaces
         Game Create(string gameName);
         IEnumerable<Game> ReadAll();
         Game Read(string id);
-        public Game ReadByPlayerId(string playerId);
+        public Game ReadGameByPlayerId(string playerId);
         void StartGame(string gameId, int roundLengthSeconds);
         void Delete(string id);
 
