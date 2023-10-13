@@ -4,7 +4,7 @@ namespace MITBeerGame.Api.Models
 {
     public class Player
     {
-        public Player(string gameId, string name, RoleType roleType)
+        public Player(string gameId, string name, RoleType roleType, int initialInOut)
         {
             Id = Guid.NewGuid().ToString()[..6];
             GameId = gameId;
@@ -12,7 +12,7 @@ namespace MITBeerGame.Api.Models
             RoleType = roleType;
             IsReady = false;
             History = new List<PlayerState>();
-            NextOrder = 0;
+            NextOrder = initialInOut;
         }
 
         public string Id { get; }

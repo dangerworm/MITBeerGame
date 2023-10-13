@@ -4,13 +4,14 @@ namespace MITBeerGame.Api.Models
 {
     public class PlayerState
     {
-        public PlayerState(string gameId, int eventNumber, RoleType roleType, int roundNumber, int stockLevel, int totalOut, int onBackOrder, Dictionary<int, int> inTransit)
+        public PlayerState(string gameId, int eventNumber, RoleType roleType, int roundNumber, int stockLevel, int lastDispatched, int totalOut, int onBackOrder, Dictionary<int, int> inTransit)
         {
             GameId = gameId;
             EventNumber = eventNumber;
             RoleType = roleType;
             RoundNumber = roundNumber;
             StockLevel = stockLevel;
+            LastDispatched = lastDispatched;
             TotalOut = totalOut;
             OnBackOrder = onBackOrder;
             InTransit = inTransit;
@@ -21,6 +22,7 @@ namespace MITBeerGame.Api.Models
         public RoleType RoleType { get; }
         public int RoundNumber { get; }
         public int StockLevel { get; }
+        public int LastDispatched { get; }
         public int TotalOut { get; }
         public int OnBackOrder { get; }
 

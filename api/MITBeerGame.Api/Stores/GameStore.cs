@@ -1,7 +1,7 @@
 ﻿using MITBeerGame.Api.Enums;
 using MITBeerGame.Api.Interfaces;
 using MITBeerGame.Api.Models;
-using MITBeerGame.Api.Services;
+using MITBeerGame.Api.Utilities;
 
 namespace MITBeerGame.Api.Stores
 {

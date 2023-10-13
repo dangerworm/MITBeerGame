@@ -47,20 +47,20 @@ namespace MITBeerGame.Api.Controllers
         [HttpPost("CreatePlayer")]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerInput input)
         {
-            var team = _gameService .Read(input.GameId);
+            var game = _gameService.Read(input.GameId);
             var roleType = input.PlayerRole.GetRoleType();
             if (_gameService.IsRoleFilled(input.GameId, roleType))
             {
-                return new JsonResult(new { Error = $"There is already a player in that role for {team.Name}" });
+                return new JsonResult(new { Error = $"There is already a player in that role for {game.Name}" });
             }
 
-            var player = new Player(input.GameId, input.PlayerName, roleType);
+            var player = new Player(input.GameId, input.PlayerName, roleType, game.InitialInOut);
             _playerService.Create(player);
 
             var games = _gameService.ReadAll();
             await _gameSetupHub.Clients.All.UpdateGames(games);
 
-            return new JsonResult(team);
+            return new JsonResult(game);
         }
 
         [HttpPost("DeletePlayer")]

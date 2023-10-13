@@ -1,22 +1,23 @@
-﻿using MITBeerGame.Api.Enums;
-using MITBeerGame.Api.Services;
+﻿
+using MITBeerGame.Api.Enums;
+using MITBeerGame.Api.Utilities;
 
 namespace MITBeerGame.Api.Models
 {
     public class Game
     {
-        public Game(string name, int initialStock = 12, int initialInOut = 4, int deliveryTimeRounds = 2)
+        public Game(string name, int initialStock = 12, int initialInOut = 4, int deliveryTimeInRounds = 2)
         {
             Id = Guid.NewGuid().ToString()[..6];
             Name = name;
 
-            var market = new Player(Id, RoleType.Market.GetRole(), RoleType.Market);
+            var market = new Player(Id, RoleType.Market.GetRole(), RoleType.Market, initialInOut);
             Players = new List<Player> { market };
 
             Events = new List<GameEvent>();
             InitialStock = initialStock;
             InitialInOut = initialInOut;
-            DeliveryTimeRounds = deliveryTimeRounds;
+            DeliveryTimeInRounds = deliveryTimeInRounds;
         }
 
         public string Id { get; }
@@ -35,35 +36,29 @@ namespace MITBeerGame.Api.Models
 
         public IEnumerable<string> PlayerNames => Players.Select(x => x.PlayerName);
 
+        public int InitialInOut { get; }
+
         private int InitialStock { get; }
 
-        private int InitialInOut { get; }
-
-        private int DeliveryTimeRounds { get; }
+        private int DeliveryTimeInRounds { get; }
 
         public void InitialisePlayer(RoleType roleType)
         {
-            var inTransit = Enumerable.Range(0, DeliveryTimeRounds + 1)
+            var inTransit = Enumerable.Range(0, DeliveryTimeInRounds + 1)
                 .ToList()
                 .ToDictionary(key => key, value => InitialInOut);
 
-            AddEvent(roleType, 0, InitialStock, InitialInOut, 0, inTransit, $"{roleType.GetRole()} initialised");
+            AddEvent(roleType, 0, InitialStock,  InitialInOut, InitialInOut, InitialInOut, 0, inTransit, $"{roleType.GetRole()} initialised");
         }
 
         public void StartNextRound()
         {
-            if (RoundNumber == 0)
-            {
-                return;
-            }
-            
             var previousRoleStockOut = 0;
 
             foreach (RoleType roleType in Enum.GetValues(typeof(RoleType)))
             {
                 var player = Players.Single(p => p.RoleType == roleType);
                 var playerLastState = player.History.Last();
-                var playerEvent = Events.Last(p => p.Player != null && p.Player.Id == player.Id);
 
                 if (roleType == RoleType.Market)
                 {
@@ -71,19 +66,21 @@ namespace MITBeerGame.Api.Models
                 }
 
                 var dependentPlayer = Players.Single(p => p.RoleType == player.RoleType + 1);
-                var dependentPlayerEvent = Events.Last(p => p.Player != null && p.Player.Id == dependentPlayer.Id);
+                var dependentPlayerLastEvent = Events.Last(e => e.Player != null && e.Player.Id == dependentPlayer.Id);
 
-                var stockOut = Math.Min(dependentPlayerEvent.OrderAmount + playerLastState.OnBackOrder,
+                var stockOut = Math.Min(dependentPlayer.NextOrder + playerLastState.OnBackOrder,
                     playerLastState.StockLevel);
-                var onBackOrder = playerLastState.OnBackOrder + dependentPlayerEvent.OrderAmount - stockOut;
+                var onBackOrder = playerLastState.OnBackOrder + dependentPlayer.NextOrder - stockOut;
                 var inTransit = GetGoodsInTransit(playerLastState, roleType, player.NextOrder, previousRoleStockOut);
-                var stockLevel = playerLastState.StockLevel - stockOut + inTransit[1];
+                var stockLevel = playerLastState.StockLevel - stockOut + inTransit[0];
                 
                 AddEvent(
                     roleType,
                     RoundNumber - 1,
                     stockLevel,
-                    playerEvent.OrderAmount,
+                    player.NextOrder,
+                    dependentPlayerLastEvent.OrderAmount,
+                    stockOut,
                     onBackOrder,
                     inTransit,
                     $"{roleType.GetRole()} updated for round {RoundNumber}");
@@ -99,13 +96,13 @@ namespace MITBeerGame.Api.Models
             int nextOrderAmount,
             int previousRoleStockOut)
         {
-            var inTransit = Enumerable.Range(0, DeliveryTimeRounds)
+            var inTransit = Enumerable.Range(0, DeliveryTimeInRounds)
                 .ToList()
                 .ToDictionary(
                     roundsUntilDelivery => roundsUntilDelivery,
                     roundsUntilDelivery => playerLastState.InTransit[roundsUntilDelivery + 1]);
 
-            inTransit[DeliveryTimeRounds] = roleType == RoleType.Brewer
+            inTransit[DeliveryTimeInRounds] = roleType == RoleType.Brewer
                 ? nextOrderAmount
                 : previousRoleStockOut;
 
@@ -117,6 +114,8 @@ namespace MITBeerGame.Api.Models
             int roundNumber,
             int stockLevel,
             int orderAmount,
+            int lastDispatched,
+            int totalOut,
             int onBackOrder,
             Dictionary<int, int> inTransit, 
             string description)
@@ -134,9 +133,9 @@ namespace MITBeerGame.Api.Models
             var player = Players.Single(p => p.RoleType == roleType);
             var eventNumber = Events.Count + 1;
                 
-            player.History.Add(new PlayerState(Id, eventNumber, roleType, roundNumber, stockLevel, orderAmount, onBackOrder, inTransit));
+            player.History.Add(new PlayerState(Id, eventNumber, roleType, roundNumber, stockLevel, lastDispatched, totalOut, onBackOrder, inTransit));
                 
-            Events.Add(new GameEvent(Id, eventNumber, player, roundNumber, InitialInOut, description));
+            Events.Add(new GameEvent(Id, eventNumber, player, roundNumber, orderAmount, description));
         }
     }
 }

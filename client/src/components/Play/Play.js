@@ -154,7 +154,7 @@ export const Play = (props) => {
               </h3>
             )}
             {gameEvents && gameEvents.length > 0 && (
-              <Status event={gameEvents[gameEvents.length - 1]} />
+              <Status type={'current'} event={{...gameEvents[gameEvents.length - 1], orderAmount}} />
             )}
             <br />
             <form onSubmit={onSubmitOrder}>
@@ -172,7 +172,7 @@ export const Play = (props) => {
 
           <div>
             <h3 style={{ marginBottom: "4pt" }}>Event History</h3>
-            {gameEvents && gameEvents.map((event, index) => 
+            {gameEvents && gameEvents.map((event, index) =>
               event.roundNumber > 0 && (
                 <div key={event.id}>
                   <p><b>Round {event.roundNumber}</b></p>
@@ -182,7 +182,7 @@ export const Play = (props) => {
                         <em>{event.description}</em>
                       </span>
                     ) :
-                    <Status event={event} />
+                    <Status type={'historic'} event={{...event, orderAmount}} />
                   }
                 </div>
               )

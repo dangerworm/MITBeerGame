@@ -1,4 +1,4 @@
-﻿namespace MITBeerGame.Api.Services
+﻿namespace MITBeerGame.Api.Utilities
 {
     public class GameTimer
     {
@@ -6,11 +6,11 @@
 
         private readonly DateTime _startTime;
 
-        public GameTimer(int roundLengthSeconds)
+        public GameTimer(int roundLengthSeconds, DateTime? startTime = null)
         {
             _roundLength = TimeSpan.FromSeconds(roundLengthSeconds);
             
-            _startTime = DateTime.UtcNow;
+            _startTime = startTime ?? DateTime.UtcNow;
         }
 
         public int GetRoundNumber()
